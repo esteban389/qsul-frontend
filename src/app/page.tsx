@@ -1,15 +1,84 @@
+'use client';
+
 import Image from 'next/image';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button, buttonVariants } from '@/components/ui/button';
+import Link from 'next/link';
+import { FormEvent, useState } from 'react';
+import useAuth from '@/hooks/useAuth';
+import { useMutation } from '@tanstack/react-query';
+import { LoaderCircle } from 'lucide-react';
 
 export default function Home() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login } = useAuth({
+    middleware: 'guest',
+    redirectIfAuthenticated: '/Inicio',
+  });
+
+  const loginMut = useMutation({
+    mutationFn: () => login(email, password),
+  });
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    loginMut.mutate();
+  };
+
   return (
-    <main className="flex min-h-screen flex-row items-center justify-between">
-      <section className="mx-4 flex-auto rounded-lg bg-gray-100/75 p-8 text-gray-800 shadow-md md:basis-1/3 md:py-4">
-        <h1>Iniciar sesión</h1>
-        <h2>Escribe tu correo y contraseña para ingresar</h2>
+    <main className="flex min-h-screen flex-row items-center justify-between lg:items-stretch">
+      <section className="m-auto">
+        <div className="mx-4 flex-auto space-y-2 rounded-lg bg-gray-100/75 p-4 text-gray-800 shadow-md lg:basis-1/3 lg:bg-transparent lg:shadow-none">
+          <div>
+            <h1 className="w-full text-center text-2xl font-bold">
+              Iniciar sesión
+            </h1>
+            <h2 className="text-center text-primary lg:text-primary/60">
+              Escribe tu correo y contraseña para ingresar
+            </h2>
+          </div>
+          <form onSubmit={handleSubmit} className="mt-2 space-y-4">
+            <div>
+              <Label htmlFor="email">Correo electrónico</Label>
+              <Input
+                type="email"
+                placeholder="ejemplo@mail.com"
+                id="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                type="password"
+                placeholder="*******"
+                id="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col items-center justify-center gap-2">
+              <Button type="submit" disabled={loginMut.isPending}>
+                {loginMut.isPending && (
+                  <LoaderCircle className="animate-spin" />
+                )}
+                Iniciar sesión
+              </Button>
+              <Link
+                className={buttonVariants({ variant: 'ghost' })}
+                href="/contrasena">
+                Olvidé mi contraseña
+              </Link>
+            </div>
+          </form>
+        </div>
       </section>
-      <section className="fixed inset-0 -z-10 flex-auto bg-gray-100 blur-[6px] md:static md:basis-3/4 md:blur-0">
+      <section className="fixed inset-0 -z-10 flex-auto bg-gray-100 blur-[6px] lg:static lg:basis-3/4 lg:blur-0">
         <Image
-          className="size-full object-cover md:object-contain"
+          className="size-full max-h-screen object-cover"
           src="/login-people.png"
           width={500}
           height={500}
