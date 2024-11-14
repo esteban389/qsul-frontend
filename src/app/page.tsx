@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 'use client';
 
 import Image from 'next/image';
@@ -37,7 +36,7 @@ export default function Home() {
     onError: error => {
       if (error instanceof AxiosError) {
         const body = error.response?.data;
-        if (body && "message" in body) {
+        if (body && 'message' in body) {
           setServerError(body.message);
         }
       }
@@ -70,18 +69,16 @@ export default function Home() {
     setEmail(value);
     setServerError(undefined);
     const { issues, success } = safeParse(EmailSchema, value);
-    if (errors.email && success) {
+    if (success) {
       setErrors({
         ...errors,
         email: undefined,
-        serverError: undefined,
       });
     }
     if (!success) {
       setErrors({
         ...errors,
         email: issues,
-        serverError: undefined,
       });
     }
   };
@@ -91,18 +88,16 @@ export default function Home() {
     setPassword(value);
     setServerError(undefined);
     const { issues, success } = safeParse(LoginPasswordSchema, value);
-    if (errors.password && success) {
+    if (success) {
       setErrors({
         ...errors,
         password: undefined,
-        serverError: undefined,
       });
     }
     if (!success) {
       setErrors({
         ...errors,
         password: issues,
-        serverError: undefined,
       });
     }
   };

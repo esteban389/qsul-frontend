@@ -1,36 +1,27 @@
-import { email, nonEmpty, object, pipe, safeParse } from 'valibot';
-import { ValidationResult } from '@/types/ValidationResult';
+import useAuth from '@/hooks/useAuth';
+import backendClient from '@/services/backendClient';
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 function sendRequest(email: string) {
-  console.log('Sending request to server with email: ', email);
-}
-
-const ForgotPasswordSchema = object({
-  email: pipe(
-    nonEmpty('Debes ingresar el correo'),
-    email('Debes ingresar un correo válido'),
-  ),
-});
-
-function validateRequest(email: string): ValidationResult {
-  const result = safeParse(ForgotPasswordSchema, { email });
-  if (result.success) {
-    return { isValid: true };
-  }
-  return {
-    isValid: false,
-    errors: { email: result.issues },
-  };
+  return backendClient.post('/forgot-password', { email });
 }
 
 export default function useForgotPassword(email: string) {
-  const validationResult = validateRequest(email);
-  const mutation = useMutation({
-    mutationFn: () => sendRequest(email),
+  const { csrf } = useAuth({
+    middleware: 'guest',
+    redirectIfAuthenticated: '/Inicio',
   });
-  if (!validationResult.isValid) {
-    return validationResult.errors;
-  }
-  return mutation;
+  const router = useRouter();
+  return useMutation({
+    mutationFn: async () => {
+      await csrf();
+      sendRequest(email);
+    },
+    onSuccess: () => {
+      toast.success('Correo electrónico enviado, revisa tu bandeja de entrada');
+      router.push('/');
+    },
+  });
 }

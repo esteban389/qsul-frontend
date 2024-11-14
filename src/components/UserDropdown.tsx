@@ -57,7 +57,7 @@ function UserDropdown({
           className="flex w-full cursor-pointer hover:!bg-destructive/10"
           onClick={() => logout()}>
           <LogOut className="text-destructive" />
-          <span className="text-destructive">Logout</span>
+          <span className="text-destructive">Cerrar sesión</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
