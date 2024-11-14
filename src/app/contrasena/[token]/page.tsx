@@ -16,6 +16,8 @@ import { LoaderCircle } from 'lucide-react';
 import Link from 'next/link';
 import useResetPassword from './useResetPassword';
 
+export const runtime = 'edge';
+
 function UpdatePassword() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
