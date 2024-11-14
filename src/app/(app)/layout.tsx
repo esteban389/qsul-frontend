@@ -13,18 +13,16 @@ function AppLayout({ children }: { children: ReactNode }) {
   if (!user) return null;
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <div className="flex h-screen w-full flex-col overflow-y-hidden">
-        <header className="flex h-16 w-full shrink-0 items-center justify-between gap-2 border-b border-sidebar-border bg-sidebar px-2 py-6 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 lg:pe-8">
-          <div className="flex items-center gap-2 px-4">
+      <AppSidebar className="!border-0" />
+      <div className="m-4 ml-2 flex w-full flex-col overflow-y-hidden rounded-2xl border-sidebar-border bg-background shadow-md">
+        <header className="flex h-16 w-full shrink-0 items-center justify-between gap-2 px-4 py-6 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <RouteBreadcrumb />
           </div>
-          <UserDropdown className="" user={user} logout={logout} />
+          <UserDropdown user={user} logout={logout} />
         </header>
-        <ScrollArea className="scroll-shadows">
-          <main>{children}</main>
-        </ScrollArea>
+        <ScrollArea className="h-full">{children}</ScrollArea>
       </div>
     </SidebarProvider>
   );

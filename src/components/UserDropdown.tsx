@@ -50,7 +50,7 @@ function UserDropdown({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <DropdownMenuContent className="w-56">
+      <DropdownMenuContent className="w-fit">
         <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem

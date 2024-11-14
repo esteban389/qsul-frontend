@@ -4,7 +4,7 @@ import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/app/types/user';
 
-interface useAuthProps {
+interface UseAuthProps {
   middleware?: 'guest' | 'auth';
   redirectIfAuthenticated?: string;
 }
@@ -12,7 +12,7 @@ interface useAuthProps {
 export default function useAuth({
   middleware = 'guest',
   redirectIfAuthenticated = '/',
-}: useAuthProps) {
+}: UseAuthProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
 

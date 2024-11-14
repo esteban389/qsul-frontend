@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
 } from '@/components/ui/sidebar';
 import { ComponentProps } from 'react';
 import { Users } from 'lucide-react';
@@ -47,7 +46,6 @@ export default function AppSidebar({
           </SidebarMenuItem>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarRail />
     </Sidebar>
   );
 }

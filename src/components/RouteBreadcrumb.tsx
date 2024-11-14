@@ -7,7 +7,6 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
-import { Home } from 'lucide-react';
 
 function RouteBreadcrumb() {
   const route = usePathname();
@@ -18,9 +17,7 @@ function RouteBreadcrumb() {
         {route !== '/Inicio' && (
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/Inicio">
-                <Home className="size-6" />
-              </Link>
+              <Link href="/Inicio">Inicio</Link>
             </BreadcrumbLink>
             <BreadcrumbSeparator />
           </BreadcrumbItem>

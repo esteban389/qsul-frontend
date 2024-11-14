@@ -27,3 +27,39 @@ export function getInitials(name: string): string {
     .join('')
     .toUpperCase();
 }
+
+/**
+ * Checks if an object is empty.
+ *
+ * @param {Object} obj - The object to check.
+ * @returns {boolean} Returns `true` if the object is empty, `false` otherwise.
+ */
+export function isObjectEmpty(obj: object) {
+  return JSON.stringify(obj) === '{}';
+}
+
+/**
+ * Converts a value from one binary unit to another.
+ * @param {number} value - The size value to be converted.
+ * @param {string} fromUnit - The unit of the input value ('B', 'KB', 'MB', 'GB').
+ * @param {string} toUnit - The unit to convert to ('B', 'KB', 'MB', 'GB').
+ * @returns {number} - The converted value.
+ */
+export type BinaryUnit = 'B' | 'KB' | 'MB' | 'GB';
+export function convertBinaryUnits(
+  value: number,
+  fromUnit: BinaryUnit,
+  toUnit: BinaryUnit,
+): number {
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const fromIndex = units.indexOf(fromUnit.toUpperCase());
+  const toIndex = units.indexOf(toUnit.toUpperCase());
+
+  if (fromIndex === -1 || toIndex === -1) {
+    throw new Error('Invalid unit specified. Use "B", "KB", "MB", or "GB".');
+  }
+
+  // Calculate the conversion factor (1024^difference in index)
+  const factor = 1024 ** (fromIndex - toIndex);
+  return value * factor;
+}
