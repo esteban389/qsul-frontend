@@ -33,6 +33,7 @@
         "singleQuote": true
       }
     ],
+    "camelcase": "off",
     "react-refresh/only-export-components":"off",
     "no-use-before-define": "off",
     "react/no-danger": "off",
