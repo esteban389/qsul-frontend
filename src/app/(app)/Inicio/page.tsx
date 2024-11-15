@@ -2,6 +2,8 @@
 
 import useAuth from '@/hooks/useAuth';
 
+export const runtime = 'edge';
+
 function HomePage() {
   const { user } = useAuth({ middleware: 'auth' });
   return (

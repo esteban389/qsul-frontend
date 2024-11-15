@@ -12,6 +12,8 @@ import ErrorText from '@/components/ui/ErrorText';
 import { LoaderCircle } from 'lucide-react';
 import useForgotPassword from './useForgotPassword';
 
+export const runtime = 'edge';
+
 function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<ValidationErrors>({

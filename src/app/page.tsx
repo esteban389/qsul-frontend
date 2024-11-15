@@ -18,6 +18,8 @@ import { safeParse } from 'valibot';
 import ErrorText from '@/components/ui/ErrorText';
 import { AxiosError } from 'axios';
 
+export const runtime = 'edge';
+
 export default function Home() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
