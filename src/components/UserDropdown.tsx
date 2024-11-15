@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { LogOut } from 'lucide-react';
-import { User } from '@/app/types/user';
+import { AuthenticatedUser } from '@/app/types/user';
 
 function UserDropdown({
   className,
@@ -24,7 +24,7 @@ function UserDropdown({
   logout,
 }: {
   className?: string;
-  user: User;
+  user: AuthenticatedUser;
   logout: () => void;
 }) {
   return (

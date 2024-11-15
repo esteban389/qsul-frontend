@@ -1,4 +1,9 @@
+'use client';
+
+import backendClient from '@/services/backendClient';
+
 function HomePage() {
+  backendClient.get('/api/users');
   return (
     <main className="mx-4 flex h-screen flex-col items-center justify-center lg:mx-auto lg:w-1/2">
       <h1 className="w-full text-center text-2xl font-bold">Bienvenido</h1>

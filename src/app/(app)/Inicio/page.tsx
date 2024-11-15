@@ -9,10 +9,6 @@ function HomePage() {
       <h1 className="w-full text-center text-2xl font-bold">
         Bienvenido {user?.name}
       </h1>
-      <h2 className="text-center text-primary/60">
-        No te preocupes, solo ingresa tu correo electrónico y te enviaremos un
-        enlace para reestablcecer tu contraseña si encontramos tu cuenta
-      </h2>
     </main>
   );
 }

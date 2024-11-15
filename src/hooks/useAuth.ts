@@ -2,7 +2,7 @@ import backendClient from '@/services/backendClient';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User } from '@/app/types/user';
+import { AuthenticatedUser } from '@/app/types/user';
 
 interface UseAuthProps {
   middleware?: 'guest' | 'auth';
@@ -24,7 +24,7 @@ export default function useAuth({
   } = useQuery({
     queryKey: ['user'],
     queryFn: async () => {
-      const response = await backendClient.get<User>('/api/user');
+      const response = await backendClient.get<AuthenticatedUser>('/api/user');
       return response.data;
     },
   });
