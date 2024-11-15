@@ -1,5 +1,3 @@
-export const runtime = 'edge';
-
 function HomePage() {
   return (
     <main className="mx-4 flex h-screen flex-col items-center justify-center lg:mx-auto lg:w-1/2">
