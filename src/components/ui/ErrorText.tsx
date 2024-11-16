@@ -10,9 +10,9 @@ export default function ErrorText({
   className,
   children,
   ...props
-}: ErrorTextProps) {
+}: Readonly<ErrorTextProps>) {
   return (
-    <p className={cn('mt-2 text-xs text-destructive', className)} role="alert"
+    <p className={cn('animateUp mt-2 text-xs text-destructive', className)} role="alert"
        aria-live="polite" {...props}>
       {children}
     </p>

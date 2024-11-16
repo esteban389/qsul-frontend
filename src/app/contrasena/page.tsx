@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { safeParse } from 'valibot';
-import { EmailSchema } from '@/Schemas/AuthenticationSchemas';
 import { ValidationErrors } from '@/types/ValidationResult';
 import ErrorText from '@/components/ui/ErrorText';
 import { LoaderCircle } from 'lucide-react';
+import { EmailSchema } from '@/Schemas/AuthenticationSchemas';
 import useForgotPassword from './useForgotPassword';
 
 function ForgotPassword() {

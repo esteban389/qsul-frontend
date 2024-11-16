@@ -10,13 +10,15 @@ import useAuth from '@/hooks/useAuth';
 import { useMutation } from '@tanstack/react-query';
 import { LoaderCircle } from 'lucide-react';
 import { ValidationErrors } from '@/types/ValidationResult';
+import { safeParse } from 'valibot';
+import ErrorText from '@/components/ui/ErrorText';
+import { AxiosError } from 'axios';
+import { toast } from 'sonner';
+import logger from '@/lib/logger';
 import {
   EmailSchema,
   LoginPasswordSchema,
 } from '@/Schemas/AuthenticationSchemas';
-import { safeParse } from 'valibot';
-import ErrorText from '@/components/ui/ErrorText';
-import { AxiosError } from 'axios';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -28,7 +30,7 @@ export default function Home() {
   const [serverError, setServerError] = useState<string | undefined>(undefined);
   const { login } = useAuth({
     middleware: 'guest',
-    redirectIfAuthenticated: '/Inicio',
+    redirectIfAuthenticated: '/inicio',
   });
 
   const loginMut = useMutation({
@@ -38,6 +40,9 @@ export default function Home() {
         const body = error.response?.data;
         if (body && 'message' in body) {
           setServerError(body.message);
+        } else {
+          toast.error(`Ocurrió un error inesperado: ${error.message}`);
+          logger.error(error.message);
         }
       }
     },

@@ -6,14 +6,14 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ValidationErrors } from '@/types/ValidationResult';
 import { safeParse } from 'valibot';
-import {
-  ResetPasswordConfirmSchema,
-  ResetPasswordSchema,
-} from '@/Schemas/AuthenticationSchemas';
 import ErrorText from '@/components/ui/ErrorText';
 import { useParams, useSearchParams } from 'next/navigation';
 import { LoaderCircle } from 'lucide-react';
 import Link from 'next/link';
+import {
+  ResetPasswordConfirmSchema,
+  ResetPasswordSchema,
+} from '@/Schemas/AuthenticationSchemas';
 import useResetPassword from './useResetPassword';
 
 export const runtime = 'edge';

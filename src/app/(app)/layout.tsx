@@ -14,7 +14,7 @@ function AppLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar className="!border-0" />
-      <div className="m-4 ml-2 flex w-full flex-col overflow-y-hidden rounded-2xl border-sidebar-border bg-background shadow-md">
+      <div className="m-4 ml-2 flex max-h-[calc(100vh-2em)] w-full flex-col overflow-y-hidden rounded-2xl border-sidebar-border bg-background shadow-md">
         <header className="flex h-16 w-full shrink-0 items-center justify-between gap-2 px-4 py-6 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />

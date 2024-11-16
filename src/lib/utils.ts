@@ -1,5 +1,6 @@
-import { clsx, type ClassValue } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Role } from '@/types/user';
 
 /**
  * Merges and conditionally combines class names using `clsx` and `tailwind-merge`.
@@ -63,3 +64,9 @@ export function convertBinaryUnits(
   const factor = 1024 ** (fromIndex - toIndex);
   return value * factor;
 }
+
+export const RolesTranslations = {
+  [Role.NATIONAL_COORDINATOR]: 'Coordinador nacional',
+  [Role.CAMPUS_COORDINATOR]: 'Coordinador seccional',
+  [Role.PROCESS_LEADER]: 'Líder de proceso',
+};

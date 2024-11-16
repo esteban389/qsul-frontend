@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es-CO">
       <body className={`${inter.className} min-h-screen bg-sidebar`}>
         <AppContext>{children}</AppContext>
       </body>

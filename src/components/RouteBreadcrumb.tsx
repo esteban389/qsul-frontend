@@ -14,13 +14,15 @@ function RouteBreadcrumb() {
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {route !== '/Inicio' && (
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/Inicio">Inicio</Link>
-            </BreadcrumbLink>
+        {route !== '/inicio' && (
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/inicio">Inicio</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
             <BreadcrumbSeparator />
-          </BreadcrumbItem>
+          </>
         )}
         {routes.map((route, index) => (
           <BreadcrumbItem key={route}>

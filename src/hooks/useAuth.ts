@@ -2,7 +2,7 @@ import backendClient from '@/services/backendClient';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthenticatedUser } from '@/app/types/user';
+import { User } from '@/types/user';
 
 interface UseAuthProps {
   middleware?: 'guest' | 'auth';
@@ -24,9 +24,10 @@ export default function useAuth({
   } = useQuery({
     queryKey: ['user'],
     queryFn: async () => {
-      const response = await backendClient.get<AuthenticatedUser>('/api/user');
+      const response = await backendClient.get<User>('/api/user');
       return response.data;
     },
+    staleTime: 1000 * 60 * 5,
   });
 
   const csrf = () => backendClient.get('/sanctum/csrf-cookie');
@@ -41,9 +42,12 @@ export default function useAuth({
   };
 
   const logout = useCallback(async () => {
-    await backendClient.post('/logout');
-    queryClient.clear();
-    router.push('/');
+    try {
+      await backendClient.post('/logout');
+    } finally {
+      queryClient.clear();
+      router.push('/');
+    }
   }, [queryClient, router]);
 
   useEffect(() => {

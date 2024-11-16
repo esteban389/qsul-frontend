@@ -16,7 +16,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { LogOut } from 'lucide-react';
-import { AuthenticatedUser } from '@/app/types/user';
+import { User } from '@/types/user';
+import env from '@/lib/env';
 
 function UserDropdown({
   className,
@@ -24,9 +25,10 @@ function UserDropdown({
   logout,
 }: {
   className?: string;
-  user: AuthenticatedUser;
+  user: User;
   logout: () => void;
 }) {
+  const imgSrc = user.avatar ? env('API_URL') + user.avatar : '/';
   return (
     <DropdownMenu>
       <TooltipProvider delayDuration={0}>
@@ -34,15 +36,12 @@ function UserDropdown({
           <TooltipTrigger asChild className="cursor-pointer">
             <DropdownMenuTrigger className={className} asChild>
               <Avatar>
-                <AvatarImage
-                  src="https://randomuser.me/api/port 1.0/portraits"
-                  alt={user?.name}
-                />
+                <AvatarImage src={imgSrc} alt={user?.name} />
                 <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent collisionPadding={16}>
             <div className="flex flex-col items-center">
               <span className="text-sm font-medium">{user.name}</span>
               <span className="text-xs">{user.email}</span>
@@ -50,7 +49,7 @@ function UserDropdown({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <DropdownMenuContent className="w-fit">
+      <DropdownMenuContent className="w-fit" collisionPadding={16}>
         <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
