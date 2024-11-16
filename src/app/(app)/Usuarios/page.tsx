@@ -53,7 +53,7 @@ import { Role } from '@/types/user';
 import { Rabbit, Search } from 'lucide-react';
 import useUsers from './useUsers';
 import columns from './TableDefinition';
-
+// TODO do server side filtering and sorting
 function HomePage() {
   const usersQuery = useUsers({});
   const [sorting, setSorting] = useState<SortingState>([]);
