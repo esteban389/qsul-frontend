@@ -13,7 +13,8 @@ import {
 import { ComponentProps } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { useUserRoutes, Route } from '@/lib/routes';
+import { Route, useUserRoutes } from '@/lib/routes';
+import { usePathname } from 'next/navigation';
 
 export default function AppSidebar({
   ...props
@@ -54,10 +55,20 @@ export default function AppSidebar({
 
 function AppSidebarItem({ route }: { route: Route }) {
   const Icon = route.icon;
+  const pathname = usePathname();
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton tooltip={route.displayName} asChild>
-        <Link href={route.path}>
+      <SidebarMenuButton
+        className="truncate hover:bg-transparent"
+        tooltip={route.displayName}
+        asChild>
+        <Link
+          href={route.path}
+          className={
+            pathname === route.path
+              ? 'border-2 border-primary-foreground bg-background shadow-md'
+              : undefined
+          }>
           <Icon /> {route.displayName}
         </Link>
       </SidebarMenuButton>

@@ -41,10 +41,7 @@ function UserSheetContent({ user }: { user: User }) {
   const can = useAuthorize();
   const deleteUserMutation = useDeleteUser(user.id);
   const restoreUserMutation = useRestoreUser(user.id);
-  const {
-    data: userDetails,
-    isPending,
-  } = useUserById({ id: user.id });
+  const { data: userDetails, isPending } = useUserById({ id: user.id });
   const onDelete = () => {
     toast.promise(deleteUserMutation.mutateAsync(), {
       loading: `Deshabilitando a ${user.name}`,

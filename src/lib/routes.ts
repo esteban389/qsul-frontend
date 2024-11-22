@@ -9,6 +9,7 @@ import {
   Home,
   LayoutPanelTop,
   NotebookTabs,
+  Package,
   Users,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
@@ -50,15 +51,11 @@ const routeGroups: RouteGroup[] = [
         authorizedRoles: [Role.NATIONAL_COORDINATOR, Role.CAMPUS_COORDINATOR],
       },
       {
-        displayName: 'Empleados',
-        name: 'employees',
-        path: '/empleados',
-        icon: BriefcaseBusiness,
-        authorizedRoles: [
-          Role.NATIONAL_COORDINATOR,
-          Role.CAMPUS_COORDINATOR,
-          Role.PROCESS_LEADER,
-        ],
+        displayName: 'Seccionales',
+        name: 'campuses',
+        path: '/seccionales',
+        icon: Building2,
+        authorizedRoles: [Role.NATIONAL_COORDINATOR],
       },
       {
         displayName: 'Procesos',
@@ -72,11 +69,26 @@ const routeGroups: RouteGroup[] = [
         ],
       },
       {
-        displayName: 'Seccionales',
-        name: 'campuses',
-        path: '/seccionales',
-        icon: Building2,
-        authorizedRoles: [Role.NATIONAL_COORDINATOR],
+        displayName: 'Servicios',
+        name: 'services',
+        path: '/servicios',
+        icon: Package,
+        authorizedRoles: [
+          Role.NATIONAL_COORDINATOR,
+          Role.CAMPUS_COORDINATOR,
+          Role.PROCESS_LEADER,
+        ],
+      },
+      {
+        displayName: 'Empleados',
+        name: 'employees',
+        path: '/empleados',
+        icon: BriefcaseBusiness,
+        authorizedRoles: [
+          Role.NATIONAL_COORDINATOR,
+          Role.CAMPUS_COORDINATOR,
+          Role.PROCESS_LEADER,
+        ],
       },
     ],
   },
@@ -84,6 +96,13 @@ const routeGroups: RouteGroup[] = [
     name: 'survey',
     displayName: 'Encuesta',
     routes: [
+      {
+        displayName: 'Preguntas',
+        name: 'questions',
+        path: '/preguntas',
+        icon: FilePenLine,
+        authorizedRoles: [Role.NATIONAL_COORDINATOR],
+      },
       {
         displayName: 'Reporte general',
         name: 'report',
@@ -116,13 +135,6 @@ const routeGroups: RouteGroup[] = [
           Role.CAMPUS_COORDINATOR,
           Role.PROCESS_LEADER,
         ],
-      },
-      {
-        displayName: 'Preguntas',
-        name: 'questions',
-        path: '/preguntas',
-        icon: FilePenLine,
-        authorizedRoles: [Role.NATIONAL_COORDINATOR],
       },
     ],
   },

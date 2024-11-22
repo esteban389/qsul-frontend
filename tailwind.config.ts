@@ -70,6 +70,12 @@ const config: Config = {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        badge: {
+          'red-background': 'var(--badge-red-background)',
+          'green-background': 'var(--badge-green-background)',
+          'red-text': 'var(--badge-red-text)',
+          'green-text': 'var(--badge-green-text)',
+        },
       },
     },
   },

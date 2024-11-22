@@ -20,30 +20,13 @@ import {
   CredenzaTitle,
   CredenzaTrigger,
 } from '@/components/ui/modal';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select';
-import { SelectValue } from '@radix-ui/react-select';
 import { safeParse } from 'valibot';
 import { useAuthorize } from '@/lib/authorizations';
-import {
-  EmailSchema,
-  UserAvatarSchema,
-  UserCampusSchema,
-  UserNameSchema,
-} from '@/Schemas/AuthenticationSchemas';
-import useCreateUser from '@/app/(app)/usuarios/useCreateUser';
 import { Label } from '@/components/ui/label';
 import ErrorText from '@/components/ui/ErrorText';
 import { toast } from 'sonner';
-import useAuth from '@/hooks/useAuth';
-import UserDetailsSheet from '@/app/(app)/usuarios/UserDetailsSheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn, getInitials } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -52,20 +35,23 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Role } from '@/types/user';
-import { Rabbit, Search } from 'lucide-react';
-import useCampuses from '@/app/(app)/seccionales/useCampuses';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import env from '@/lib/env';
-import useUsers from './useUsers';
+import { Dog, Search } from 'lucide-react';
+import useCreateCampus from '@/app/(app)/seccionales/useCreateCampus';
+import {
+  CampusAddressSchema,
+  CampusIconSchema,
+  CampusNameSchema,
+} from '@/Schemas/UniversitySchema';
+import CampusDetailsSheet from '@/app/(app)/seccionales/CampusDetailsSheet';
+import useCampuses from './useCampuses';
 import columns from './TableDefinition';
 
-function UsersPage() {
-  const usersQuery = useUsers({});
+function CampusPage() {
+  const campusesQuery = useCampuses();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
-    data: usersQuery.data || [],
+    data: campusesQuery.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -90,16 +76,16 @@ function UsersPage() {
           {can('create', 'user') && (
             <Credenza>
               <CredenzaTrigger asChild>
-                <Button>Crear usuario</Button>
+                <Button>Crear seccional</Button>
               </CredenzaTrigger>
               <CredenzaContent>
-                <CreateUserModal />
+                <CreateCampusModal />
               </CredenzaContent>
             </Credenza>
           )}
           <div className="relative w-full max-w-lg">
             <Input
-              placeholder="Armando Casas"
+              placeholder="Cúcuta"
               value={
                 (table.getColumn('name')?.getFilterValue() as string) ?? ''
               }
@@ -134,10 +120,12 @@ function UsersPage() {
               ))}
             </TableHeader>
             <TableBody>
-              {usersQuery.isSuccess && table.getRowModel().rows?.length ? (
+              {campusesQuery.isSuccess && table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map(row => (
-                  <UserDetailsSheet key={row.id} user={row.original}>
-                    <TableRow data-state={row.getIsSelected() && 'selected'}>
+                  <CampusDetailsSheet campus={row.original} key={row.id}>
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && 'selected'}>
                       {row.getVisibleCells().map(cell => (
                         <TableCell key={cell.id}>
                           {flexRender(
@@ -147,7 +135,7 @@ function UsersPage() {
                         </TableCell>
                       ))}
                     </TableRow>
-                  </UserDetailsSheet>
+                  </CampusDetailsSheet>
                 ))
               ) : (
                 <TableRow>
@@ -155,9 +143,9 @@ function UsersPage() {
                     colSpan={table.getVisibleFlatColumns().length}
                     className="h-24">
                     <div className="flex w-full flex-col items-center justify-center py-8">
-                      <Rabbit className="size-28 transition hover:-scale-x-100" />
+                      <Dog className="size-28 transition hover:-scale-x-100" />
                       <p className="ml-4 text-lg font-semibold">
-                        Upps, parece que no hay usuarios
+                        Upps, parece que no hay seccionales
                       </p>
                     </div>
                   </TableCell>
@@ -187,58 +175,41 @@ function UsersPage() {
   );
 }
 
-// TODO Make campuses dynamic
-function CreateUserModal() {
-  const { user } = useAuth({
-    redirectIfAuthenticated: '/',
-    middleware: 'auth',
-  });
-  const { data: campuses, isSuccess } = useCampuses({
-    deleted_at: 'null',
-  });
+function CreateCampusModal() {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [avatar, setAvatar] = useState<File | null>(null);
-  const [campus, setCampus] = useState<string | null>(null);
+  const [icon, setIcon] = useState<File | null>(null);
+  const [address, setAddress] = useState('');
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
-  const createUserMutation = useCreateUser({
+  const createUserMutation = useCreateCampus({
     name,
-    email,
-    avatar,
-    campus_id: campus ? Number(campus) : undefined,
+    icon,
+    address,
   });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const nameResult = safeParse(UserNameSchema, name);
-    const emailResult = safeParse(EmailSchema, email);
-    const avatarResult = safeParse(UserAvatarSchema, avatar);
-    const campusResult = safeParse(UserCampusSchema, campus);
-    if (
-      nameResult.success &&
-      emailResult.success &&
-      avatarResult.success &&
-      (campusResult.success || user?.role !== Role.NATIONAL_COORDINATOR)
-    ) {
+    const nameResult = safeParse(CampusNameSchema, name);
+    const addressResult = safeParse(CampusAddressSchema, address);
+    const iconResult = safeParse(CampusIconSchema, icon);
+    if (nameResult.success && iconResult.success && addressResult.success) {
       toast.promise(createUserMutation.mutateAsync(), {
-        loading: 'Creando usuario...',
-        success: 'Usuario creado correctamente',
-        error: 'Error al crear el usuario',
+        loading: 'Creando seccional...',
+        success: 'Seccional creado correctamente',
+        error: 'Error al crear la seccional',
       });
       return;
     }
     setErrors({
       name: nameResult.issues && nameResult.issues[0].message,
-      email: emailResult.issues && emailResult.issues[0].message,
-      avatar: avatarResult.issues && avatarResult.issues[0].message,
-      campus: campusResult.issues && campusResult.issues[0].message,
+      icon: iconResult.issues && iconResult.issues[0].message,
+      address: addressResult.issues && addressResult.issues[0].message,
     });
   };
 
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setName(value);
-    const result = safeParse(UserNameSchema, value);
+    const result = safeParse(CampusNameSchema, value);
     if (result.success) {
       setErrors({
         ...errors,
@@ -252,29 +223,29 @@ function CreateUserModal() {
     });
   };
 
-  const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const onAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setEmail(value);
-    const result = safeParse(EmailSchema, value);
+    setAddress(value);
+    const result = safeParse(CampusAddressSchema, value);
     if (result.success) {
       setErrors({
         ...errors,
-        email: undefined,
+        address: undefined,
       });
       return;
     }
     setErrors({
       ...errors,
-      email: result.issues[0].message,
+      address: result.issues[0].message,
     });
   };
 
-  const onAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const onIconChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     const file = files && files[0];
 
-    setAvatar(file);
-    const result = safeParse(UserAvatarSchema, file);
+    setIcon(file);
+    const result = safeParse(CampusIconSchema, file);
     if (result.success) {
       setErrors({
         ...errors,
@@ -288,87 +259,37 @@ function CreateUserModal() {
     });
   };
 
-  const onCampusChange = (value: string) => {
-    setCampus(value);
-    const result = safeParse(UserCampusSchema, value);
-    if (result.success) {
-      setErrors({
-        ...errors,
-        campus: undefined,
-      });
-      return;
-    }
-    setErrors({
-      ...errors,
-      campus: result.issues[0].message,
-    });
-  };
-
   return (
     <form onSubmit={onSubmit} className="space-y-4 p-12">
-      <CredenzaTitle className="mb-4">Crear usuario</CredenzaTitle>
+      <CredenzaTitle className="mb-4">Crear Seccional</CredenzaTitle>
       <CredenzaDescription className="sr-only">
-        Crear un usuario
+        Crear un seccional
       </CredenzaDescription>
       <div>
         <Label htmlFor="name">Nombre</Label>
         <Input
           name="name"
-          placeholder="Elsa Pato"
+          placeholder="Cúcuta"
           value={name}
           onChange={onNameChange}
         />
         {errors.name && <ErrorText>{errors.name}</ErrorText>}
       </div>
       <div>
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="address">Dirección</Label>
         <Input
-          name="email"
-          placeholder="elsa@ejemplo.com"
-          value={email}
-          onChange={onEmailChange}
+          name="address"
+          placeholder="Calle 14"
+          value={address}
+          onChange={onAddressChange}
         />
-        {errors.email && <ErrorText>{errors.email}</ErrorText>}
+        {errors.address && <ErrorText>{errors.address}</ErrorText>}
       </div>
       <div>
-        <Label htmlFor="avatar">Imagen de perfil</Label>
-        <Input name="avatar" type="file" onChange={onAvatarChange} />
-        {errors.avatar && <ErrorText>{errors.avatar}</ErrorText>}
+        <Label htmlFor="avatar">Ícono del campus</Label>
+        <Input name="avatar" type="file" onChange={onIconChange} />
+        {errors.icon && <ErrorText>{errors.icon}</ErrorText>}
       </div>
-      {user?.role === Role.NATIONAL_COORDINATOR && (
-        <div>
-          <Select onValueChange={onCampusChange}>
-            <SelectTrigger className="h-fit">
-              <SelectValue placeholder="Seleccionar campus" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {isSuccess &&
-                  campuses.map(campus => (
-                    <SelectItem value={String(campus.id)}>
-                      <div className="flex flex-row items-center gap-4">
-                        <Avatar>
-                          <AvatarImage
-                            src={
-                              campus.icon
-                                ? env('API_URL') + campus.icon
-                                : undefined
-                            }
-                          />
-                          <AvatarFallback>
-                            {getInitials(campus.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        {campus.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          {errors.campus && <ErrorText>{errors.campus}</ErrorText>}
-        </div>
-      )}
       <div className="flex w-full justify-center">
         <Button>Guardar</Button>
       </div>
@@ -376,4 +297,4 @@ function CreateUserModal() {
   );
 }
 
-export default UsersPage;
+export default CampusPage;

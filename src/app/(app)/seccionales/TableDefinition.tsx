@@ -1,13 +1,13 @@
 import { Button } from '@/components/ui/button';
-import { cn, getInitials, RolesTranslations } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 import { ColumnDef } from '@tanstack/react-table';
 import { ArrowDown } from 'lucide-react';
-import { User } from '@/types/user';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import env from '@/lib/env';
+import { Campus } from '@/types/campus';
 
-const columns: ColumnDef<User>[] = [
+const columns: ColumnDef<Campus>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -32,9 +32,7 @@ const columns: ColumnDef<User>[] = [
         <Avatar>
           <AvatarImage
             src={
-              row.original.avatar
-                ? env('API_URL') + row.original.avatar
-                : undefined
+              row.original.icon ? env('API_URL') + row.original.icon : undefined
             }
           />
           <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>
@@ -42,47 +40,6 @@ const columns: ColumnDef<User>[] = [
         {row.original.name}
       </div>
     ),
-  },
-  {
-    accessorKey: 'email',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            column.toggleSorting(column.getIsSorted() === 'asc');
-          }}>
-          Correo
-          <ArrowDown
-            className={cn(
-              'ml-2 size-4 transition-transform',
-              column.getIsSorted() === 'desc' && 'rotate-180',
-            )}
-          />
-        </Button>
-      );
-    },
-  },
-  {
-    accessorKey: 'role',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            column.toggleSorting(column.getIsSorted() === 'asc');
-          }}>
-          Rol
-          <ArrowDown
-            className={cn(
-              'ml-2 size-4 transition-transform',
-              column.getIsSorted() === 'desc' && 'rotate-180',
-            )}
-          />
-        </Button>
-      );
-    },
-    cell: ({ row }) => RolesTranslations[row.original.role],
   },
   {
     accessorKey: 'deleted_at',

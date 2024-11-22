@@ -8,3 +8,15 @@ export type Campus = {
   updated_at: string;
   deleted_at: string;
 };
+
+export type CreateCampusRequest = {
+  name: string;
+  address: string;
+  icon: File | null;
+};
+
+export type UpdateCampusRequest = {
+  name: string;
+  address: string;
+  icon: File | null | undefined;
+};

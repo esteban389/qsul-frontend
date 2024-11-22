@@ -57,6 +57,10 @@
         --sidebar-accent-foreground: 240 5.9% 10%;
         --sidebar-border: 220 13% 91%;
         --sidebar-ring: 217.2 91.2% 59.8%;
+        --badge-red-text: #e1001d;
+        --badge-red-background: #250005;
+        --badge-green-text: #00CA51;
+        --badge-green-background: #003314;
     }
 
     .dark {
