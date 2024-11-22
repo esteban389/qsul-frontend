@@ -27,6 +27,17 @@ import { toast } from 'sonner';
 import useRestoreCampus from '@/app/(app)/seccionales/useRestoreCampus';
 import { AxiosError } from 'axios';
 import useUpdateCampus from '@/app/(app)/seccionales/useUpdateCampus';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function CampusDetailsSheet({
   campus,
@@ -203,9 +214,9 @@ function CampusSheetContent({ campus }: { campus: Campus }) {
                 Restaurar
               </Button>
             ) : (
-              <Button variant="destructive" onClick={onDelete}>
-                Eliminar
-              </Button>
+              <DeleteCampusAlert name={campus.name} action={onDelete}>
+                <Button variant="destructive">Eliminar</Button>
+              </DeleteCampusAlert>
             )}
           </SheetClose>
         )}
@@ -216,5 +227,32 @@ function CampusSheetContent({ campus }: { campus: Campus }) {
         )}
       </SheetFooter>
     </>
+  );
+}
+function DeleteCampusAlert({
+  children,
+  name,
+  action,
+}: {
+  children: ReactNode;
+  name: string;
+  action: () => void;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Eliminar seccional {name}</AlertDialogTitle>
+          <AlertDialogDescription>
+            ¿Estás seguro de que deseas eliminar la seccional {name}?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={action}>Eliminar</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

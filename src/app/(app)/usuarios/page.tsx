@@ -187,7 +187,6 @@ function UsersPage() {
   );
 }
 
-// TODO Make campuses dynamic
 function CreateUserModal() {
   const { user } = useAuth({
     redirectIfAuthenticated: '/',

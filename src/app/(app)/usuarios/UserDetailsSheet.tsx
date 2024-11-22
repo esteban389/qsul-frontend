@@ -18,6 +18,17 @@ import useRestoreUser from '@/app/(app)/usuarios/useRestoreUser';
 import useUserById from '@/app/(app)/usuarios/useUserById';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthorize } from '@/lib/authorizations';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function UserDetailsSheet({
   user,
@@ -41,7 +52,10 @@ function UserSheetContent({ user }: { user: User }) {
   const can = useAuthorize();
   const deleteUserMutation = useDeleteUser(user.id);
   const restoreUserMutation = useRestoreUser(user.id);
-  const { data: userDetails, isPending } = useUserById({ id: user.id });
+  const {
+    data: userDetails,
+    isPending,
+  } = useUserById({ id: user.id });
   const onDelete = () => {
     toast.promise(deleteUserMutation.mutateAsync(), {
       loading: `Deshabilitando a ${user.name}`,
@@ -91,17 +105,47 @@ function UserSheetContent({ user }: { user: User }) {
       </div>
       {can('delete', 'user') && (
         <SheetFooter className="mt-auto">
-          <SheetClose asChild>
-            {user.deleted_at ? (
+          {user.deleted_at ? (
+            <SheetClose>
               <Button onClick={onRestore}>Restaurar</Button>
-            ) : (
-              <Button variant="destructive" onClick={onDelete}>
-                Eliminate
-              </Button>
-            )}
-          </SheetClose>
+            </SheetClose>
+          ) : (
+            <DeleteUserAlert
+              name={user.name}
+              action={onDelete}>
+              <Button variant="destructive">Eliminate</Button>
+            </DeleteUserAlert>
+          )}
         </SheetFooter>
       )}
     </>
+  );
+}
+
+function DeleteUserAlert({
+  children,
+  name,
+  action,
+}: {
+  children: ReactNode;
+  name: string;
+  action: () => void;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Eliminar a {name}</AlertDialogTitle>
+          <AlertDialogDescription>
+            ¿Estás seguro de que deseas eliminar a {name}?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={action}>Eliminar</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
