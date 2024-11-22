@@ -1,5 +1,16 @@
 import { ElementType } from 'react';
-import { Home, Users } from 'lucide-react';
+import {
+  Activity,
+  BriefcaseBusiness,
+  Building2,
+  ChartPie,
+  FilePenLine,
+  History,
+  Home,
+  LayoutPanelTop,
+  NotebookTabs,
+  Users,
+} from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { Role } from '@/types/user';
 
@@ -36,6 +47,94 @@ const routeGroups: RouteGroup[] = [
         name: 'users',
         path: '/usuarios',
         icon: Users,
+        authorizedRoles: [Role.NATIONAL_COORDINATOR, Role.CAMPUS_COORDINATOR],
+      },
+      {
+        displayName: 'Empleados',
+        name: 'employees',
+        path: '/empleados',
+        icon: BriefcaseBusiness,
+        authorizedRoles: [
+          Role.NATIONAL_COORDINATOR,
+          Role.CAMPUS_COORDINATOR,
+          Role.PROCESS_LEADER,
+        ],
+      },
+      {
+        displayName: 'Procesos',
+        name: 'processes',
+        path: '/procesos',
+        icon: LayoutPanelTop,
+        authorizedRoles: [
+          Role.NATIONAL_COORDINATOR,
+          Role.CAMPUS_COORDINATOR,
+          Role.PROCESS_LEADER,
+        ],
+      },
+      {
+        displayName: 'Seccionales',
+        name: 'campuses',
+        path: '/seccionales',
+        icon: Building2,
+        authorizedRoles: [Role.NATIONAL_COORDINATOR],
+      },
+    ],
+  },
+  {
+    name: 'survey',
+    displayName: 'Encuesta',
+    routes: [
+      {
+        displayName: 'Reporte general',
+        name: 'report',
+        path: '/reporte',
+        icon: ChartPie,
+        authorizedRoles: [
+          Role.NATIONAL_COORDINATOR,
+          Role.CAMPUS_COORDINATOR,
+          Role.PROCESS_LEADER,
+        ],
+      },
+      {
+        displayName: 'Reporte detallado',
+        name: 'detailed-report',
+        path: '/reporte-detallado',
+        icon: NotebookTabs,
+        authorizedRoles: [
+          Role.NATIONAL_COORDINATOR,
+          Role.CAMPUS_COORDINATOR,
+          Role.PROCESS_LEADER,
+        ],
+      },
+      {
+        displayName: 'Historial de cambios',
+        name: 'history',
+        path: '/historial-encuesta',
+        icon: History,
+        authorizedRoles: [
+          Role.NATIONAL_COORDINATOR,
+          Role.CAMPUS_COORDINATOR,
+          Role.PROCESS_LEADER,
+        ],
+      },
+      {
+        displayName: 'Preguntas',
+        name: 'questions',
+        path: '/preguntas',
+        icon: FilePenLine,
+        authorizedRoles: [Role.NATIONAL_COORDINATOR],
+      },
+    ],
+  },
+  {
+    name: 'audit',
+    displayName: 'Auditoría',
+    routes: [
+      {
+        displayName: 'Auditoría',
+        name: 'audit',
+        path: '/auditoria',
+        icon: Activity,
         authorizedRoles: [Role.NATIONAL_COORDINATOR, Role.CAMPUS_COORDINATOR],
       },
     ],

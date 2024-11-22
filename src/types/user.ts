@@ -1,3 +1,6 @@
+import { Campus } from '@/types/campus';
+import { Employee } from '@/types/employee';
+
 export enum Role {
   NATIONAL_COORDINATOR = 'national_coordinator',
   CAMPUS_COORDINATOR = 'campus_coordinator',
@@ -16,6 +19,11 @@ export type User = {
   campus_id: number | null;
   employee_id: number | null;
   avatar: string | null;
+};
+
+export type UserWithDetails = User & {
+  campus?: Campus;
+  employee?: Employee;
 };
 
 export type CreateUserRequest = {

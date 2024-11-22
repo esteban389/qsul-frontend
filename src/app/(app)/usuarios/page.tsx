@@ -2,8 +2,10 @@
 
 import { ChangeEvent, FormEvent, useState } from 'react';
 import {
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
@@ -53,18 +55,21 @@ import { Role } from '@/types/user';
 import { Rabbit, Search } from 'lucide-react';
 import useUsers from './useUsers';
 import columns from './TableDefinition';
-// TODO do server side filtering and sorting
+
 function HomePage() {
   const usersQuery = useUsers({});
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
     data: usersQuery.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    state: { sorting },
+    state: { sorting, columnFilters },
   });
   const can = useAuthorize();
 
@@ -75,11 +80,7 @@ function HomePage() {
       </h1>
       <div className="w-full max-w-[90%] space-y-4">
         <div className="flex w-full flex-col justify-between gap-4 md:flex-row">
-          <div className="relative">
-            <Input placeholder="Armando Casas" className="max-w-sm" />
-            <Search className="pointer-events-none absolute inset-y-0 right-0 mr-2 h-full text-muted-foreground" />
-          </div>
-          {can('user', 'create') && (
+          {can('create', 'user') && (
             <Credenza>
               <CredenzaTrigger asChild>
                 <Button>Crear usuario</Button>
@@ -89,6 +90,18 @@ function HomePage() {
               </CredenzaContent>
             </Credenza>
           )}
+          <div className="relative w-full max-w-lg">
+            <Input
+              placeholder="Armando Casas"
+              value={
+                (table.getColumn('name')?.getFilterValue() as string) ?? ''
+              }
+              onChange={e =>
+                table.getColumn('name')?.setFilterValue(e.target.value)
+              }
+            />
+            <Search className="pointer-events-none absolute inset-y-0 right-0 mr-2 h-full text-muted-foreground" />
+          </div>
         </div>
         <ScrollArea
           className={cn(
@@ -113,39 +126,37 @@ function HomePage() {
                 </TableRow>
               ))}
             </TableHeader>
-            {usersQuery.isSuccess && (
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map(row => (
-                    <UserDetailsSheet key={row.id} user={row.original}>
-                      <TableRow data-state={row.getIsSelected() && 'selected'}>
-                        {row.getVisibleCells().map(cell => (
-                          <TableCell key={cell.id}>
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </UserDetailsSheet>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={table.getVisibleFlatColumns().length}
-                      className="h-24">
-                      <div className="flex w-full flex-col items-center justify-center py-8">
-                        <Rabbit className="size-28 transition hover:-scale-x-100" />
-                        <p className="ml-4 text-lg font-semibold">
-                          Upps, parece que no hay usuarios
-                        </p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            )}
+            <TableBody>
+              {usersQuery.isSuccess && table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map(row => (
+                  <UserDetailsSheet key={row.id} user={row.original}>
+                    <TableRow data-state={row.getIsSelected() && 'selected'}>
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </UserDetailsSheet>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={table.getVisibleFlatColumns().length}
+                    className="h-24">
+                    <div className="flex w-full flex-col items-center justify-center py-8">
+                      <Rabbit className="size-28 transition hover:-scale-x-100" />
+                      <p className="ml-4 text-lg font-semibold">
+                        Upps, parece que no hay usuarios
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
           </Table>
         </ScrollArea>
         <div className="flex items-center justify-end space-x-2 py-4">

@@ -70,7 +70,7 @@ export const useAuthorize = () => {
     middleware: 'auth',
   });
 
-  return (entity: entities, operation: operations) => {
+  return (operation: operations, entity: entities) => {
     if (!user) return false;
 
     return can(user.role, entity, operation);

@@ -1,9 +1,11 @@
 import { Button } from '@/components/ui/button';
-import { cn, RolesTranslations } from '@/lib/utils';
+import { cn, getInitials, RolesTranslations } from '@/lib/utils';
 import { ColumnDef } from '@tanstack/react-table';
 import { ArrowDown } from 'lucide-react';
 import { User } from '@/types/user';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import env from '@/lib/env';
 
 const columns: ColumnDef<User>[] = [
   {
@@ -25,6 +27,21 @@ const columns: ColumnDef<User>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => (
+      <div className="flex flex-row items-center gap-4">
+        <Avatar>
+          <AvatarImage
+            src={
+              row.original.avatar
+                ? env('API_URL') + row.original.avatar
+                : undefined
+            }
+          />
+          <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>
+        </Avatar>
+        {row.original.name}
+      </div>
+    ),
   },
   {
     accessorKey: 'email',

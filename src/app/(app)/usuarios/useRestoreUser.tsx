@@ -2,7 +2,7 @@ import backendClient from '@/services/backendClient';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 function sendRequest(id: number) {
-  return backendClient.patch(`/users/${id}`);
+  return backendClient.patch(`/api/users/${id}`);
 }
 
 export default function useRestoreUser(id: number) {
