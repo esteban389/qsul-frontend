@@ -111,6 +111,34 @@ const columns: ColumnDef<User>[] = [
       ),
   },
   {
+    accessorKey: 'updated_at',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => {
+            column.toggleSorting(column.getIsSorted() === 'asc');
+          }}>
+          Fecha de última actualización
+          <ArrowDown
+            className={cn(
+              'ml-2 size-4 transition-transform',
+              column.getIsSorted() === 'desc' && 'rotate-180',
+            )}
+          />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      if (!row.original.updated_at) return 'N/A';
+      const date = new Date(row.original.updated_at);
+      return new Intl.DateTimeFormat('es-CO', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(date);
+    },
+  },
+  {
     accessorKey: 'created_at',
     header: ({ column }) => {
       return (

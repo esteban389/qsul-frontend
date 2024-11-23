@@ -5,9 +5,9 @@ import { ArrowDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import env from '@/lib/env';
-import { Campus } from '@/types/campus';
+import { Process } from '@/types/process';
 
-const columns: ColumnDef<Campus>[] = [
+const columns: ColumnDef<Process>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => {

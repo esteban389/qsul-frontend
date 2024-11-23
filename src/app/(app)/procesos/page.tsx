@@ -26,7 +26,7 @@ import { Label } from '@/components/ui/label';
 import ErrorText from '@/components/ui/ErrorText';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -35,23 +35,32 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Dog, Search } from 'lucide-react';
-import useCreateCampus from '@/app/(app)/seccionales/useCreateCampus';
+import { Fish, Search } from 'lucide-react';
 import {
-  CampusAddressSchema,
-  CampusIconSchema,
-  CampusNameSchema,
+  ProcessIconSchema,
+  ProcessNameSchema,
 } from '@/Schemas/UniversitySchema';
-import CampusDetailsSheet from '@/app/(app)/seccionales/CampusDetailsSheet';
-import useCampuses from './useCampuses';
+import useCreateProcess from '@/app/(app)/procesos/useCreateProcess';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select';
+import { SelectValue } from '@radix-ui/react-select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import env from '@/lib/env';
+import ProcessDetailsSheet from '@/app/(app)/procesos/ProcessDetailsSheet';
+import useProcesses from './useProcesses';
 import columns from './TableDefinition';
 
 function CampusPage() {
-  const campusesQuery = useCampuses();
+  const processesQuery = useProcesses();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
-    data: campusesQuery.data || [],
+    data: processesQuery.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -76,16 +85,16 @@ function CampusPage() {
           {can('create', 'user') && (
             <Credenza>
               <CredenzaTrigger asChild>
-                <Button>Crear seccional</Button>
+                <Button>Crear proceso</Button>
               </CredenzaTrigger>
               <CredenzaContent>
-                <CreateCampusModal />
+                <CreateProcessModal />
               </CredenzaContent>
             </Credenza>
           )}
           <div className="relative w-full max-w-lg">
             <Input
-              placeholder="Cúcuta"
+              placeholder="Docencia"
               value={
                 (table.getColumn('name')?.getFilterValue() as string) ?? ''
               }
@@ -120,9 +129,9 @@ function CampusPage() {
               ))}
             </TableHeader>
             <TableBody>
-              {campusesQuery.isSuccess && table.getRowModel().rows?.length ? (
+              {processesQuery.isSuccess && table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map(row => (
-                  <CampusDetailsSheet campus={row.original} key={row.id}>
+                  <ProcessDetailsSheet process={row.original}>
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && 'selected'}>
@@ -135,7 +144,7 @@ function CampusPage() {
                         </TableCell>
                       ))}
                     </TableRow>
-                  </CampusDetailsSheet>
+                  </ProcessDetailsSheet>
                 ))
               ) : (
                 <TableRow>
@@ -143,7 +152,7 @@ function CampusPage() {
                     colSpan={table.getVisibleFlatColumns().length}
                     className="h-24">
                     <div className="flex w-full flex-col items-center justify-center py-8">
-                      <Dog className="size-28 transition hover:-scale-x-100" />
+                      <Fish className="size-28 transition hover:-scale-x-100" />
                       <p className="ml-4 text-lg font-semibold">
                         Upps, parece que no hay seccionales
                       </p>
@@ -175,23 +184,23 @@ function CampusPage() {
   );
 }
 
-function CreateCampusModal() {
+function CreateProcessModal() {
   const [name, setName] = useState('');
   const [icon, setIcon] = useState<File | null>(null);
-  const [address, setAddress] = useState('');
+  const [parent, setParent] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
-  const createUserMutation = useCreateCampus({
+  const { data: processes, isSuccess } = useProcesses({ deleted_at: 'null' });
+  const createUserMutation = useCreateProcess({
     name,
     icon,
-    address,
+    parent_id: parent,
   });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const nameResult = safeParse(CampusNameSchema, name);
-    const addressResult = safeParse(CampusAddressSchema, address);
-    const iconResult = safeParse(CampusIconSchema, icon);
-    if (nameResult.success && iconResult.success && addressResult.success) {
+    const nameResult = safeParse(ProcessNameSchema, name);
+    const iconResult = safeParse(ProcessIconSchema, icon);
+    if (nameResult.success && iconResult.success) {
       toast.promise(createUserMutation.mutateAsync(), {
         loading: 'Creando seccional...',
         success: 'Seccional creado correctamente',
@@ -202,14 +211,13 @@ function CreateCampusModal() {
     setErrors({
       name: nameResult.issues && nameResult.issues[0].message,
       icon: iconResult.issues && iconResult.issues[0].message,
-      address: addressResult.issues && addressResult.issues[0].message,
     });
   };
 
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setName(value);
-    const result = safeParse(CampusNameSchema, value);
+    const result = safeParse(ProcessNameSchema, value);
     if (result.success) {
       setErrors({
         ...errors,
@@ -223,29 +231,12 @@ function CreateCampusModal() {
     });
   };
 
-  const onAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setAddress(value);
-    const result = safeParse(CampusAddressSchema, value);
-    if (result.success) {
-      setErrors({
-        ...errors,
-        address: undefined,
-      });
-      return;
-    }
-    setErrors({
-      ...errors,
-      address: result.issues[0].message,
-    });
-  };
-
   const onIconChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     const file = files && files[0];
 
     setIcon(file);
-    const result = safeParse(CampusIconSchema, file);
+    const result = safeParse(ProcessIconSchema, file);
     if (result.success) {
       setErrors({
         ...errors,
@@ -256,6 +247,14 @@ function CreateCampusModal() {
     setErrors({
       ...errors,
       icon: result.issues[0].message,
+    });
+  };
+
+  const onProcessChange = (value: string) => {
+    setParent(Number(value));
+    setErrors({
+      ...errors,
+      parent: undefined,
     });
   };
 
@@ -276,19 +275,40 @@ function CreateCampusModal() {
         {errors.name && <ErrorText>{errors.name}</ErrorText>}
       </div>
       <div>
-        <Label htmlFor="address">Dirección</Label>
-        <Input
-          name="address"
-          placeholder="Calle 14"
-          value={address}
-          onChange={onAddressChange}
-        />
-        {errors.address && <ErrorText>{errors.address}</ErrorText>}
-      </div>
-      <div>
         <Label htmlFor="avatar">Ícono del campus</Label>
         <Input name="avatar" type="file" onChange={onIconChange} />
         {errors.icon && <ErrorText>{errors.icon}</ErrorText>}
+      </div>
+      <div>
+        <Select onValueChange={onProcessChange}>
+          <SelectTrigger className="h-fit">
+            <SelectValue placeholder="Seleccionar proceso padre" />
+          </SelectTrigger>
+          <SelectContent className="max-h-60">
+            <SelectGroup>
+              {isSuccess &&
+                processes.map(process => (
+                  <SelectItem value={String(process.id)}>
+                    <div className="flex flex-row items-center gap-4">
+                      <Avatar>
+                        <AvatarImage
+                          src={
+                            process.icon
+                              ? env('API_URL') + process.icon
+                              : undefined
+                          }
+                        />
+                        <AvatarFallback>
+                          {getInitials(process.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      {process.name}
+                    </div>
+                  </SelectItem>
+                ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
       <div className="flex w-full justify-center">
         <Button>Guardar</Button>
