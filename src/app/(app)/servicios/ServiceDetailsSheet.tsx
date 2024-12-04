@@ -20,11 +20,8 @@ import { safeParse } from 'valibot';
 import { useAuthorize } from '@/lib/authorizations';
 import ErrorText from '@/components/ui/ErrorText';
 import { Button } from '@/components/ui/button';
-import useDeleteProcess from '@/app/(app)/procesos/useDeleteProcess';
 import { toast } from 'sonner';
-import useRestoreProcess from '@/app/(app)/procesos/useRestoreProcess';
 import { AxiosError } from 'axios';
-import useUpdateProcess from '@/app/(app)/procesos/useUpdateProcess';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,6 +45,9 @@ import useProcesses from '@/app/(app)/procesos/useProcesses';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Service } from '@/types/service';
+import useUpdateService from './useUpdateService';
+import useDeleteService from './useDeleteService';
+import useRestoreService from './useRestoreService';
 
 export default function ServiceDetailsSheet({
   service,
@@ -60,17 +60,17 @@ export default function ServiceDetailsSheet({
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent className="flex h-full flex-col">
-        <ProcessSheetContent service={service} />
+        <ServiceSheetContent service={service} />
       </SheetContent>
     </Sheet>
   );
 }
 
-function ProcessSheetContent({ service }: Readonly<{ service: Service }>) {
+function ServiceSheetContent({ service }: Readonly<{ service: Service }>) {
   const imgSrc = service.icon ? env('API_URL') + service.icon : '/';
   const [icon, setIcon] = useState<File | null>();
   const [name, setName] = useState(service.name);
-  const [parent, setParent] = useState<number | null>(service.process_id);
+  const [process, setProcess] = useState<number>(service.process_id);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   const can = useAuthorize();
@@ -81,14 +81,14 @@ function ProcessSheetContent({ service }: Readonly<{ service: Service }>) {
   } = useProcesses({
     deleted_at: 'null',
   });
-  const updateMutation = useUpdateProcess(service.id, {
+  const updateMutation = useUpdateService(service.id, {
     icon,
     name,
-    parent_id: parent === 0 ? null : parent,
+    process_id: process,
   });
 
-  const deleteMutation = useDeleteProcess(service.id);
-  const restoreMutation = useRestoreProcess(service.id);
+  const deleteMutation = useDeleteService(service.id);
+  const restoreMutation = useRestoreService(service.id);
 
   const onUpdate = () => {
     const iconResult = safeParse(OptionalCampusIconSchema, icon);
@@ -177,7 +177,7 @@ function ProcessSheetContent({ service }: Readonly<{ service: Service }>) {
   };
 
   const onProcessChange = (value: string) => {
-    setParent(Number(value));
+    setProcess(Number(value));
     setErrors({
       ...errors,
       parent: undefined,
@@ -222,17 +222,12 @@ function ProcessSheetContent({ service }: Readonly<{ service: Service }>) {
                 name="parent"
                 onValueChange={onProcessChange}
                 disabled={!can('update', 'service')}
-                value={parent ? String(parent) : undefined}>
+                value={process ? String(process) : undefined}>
                 <SelectTrigger className="h-fit">
                   <SelectValue placeholder="Asociar con un proceso" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
                   <SelectGroup>
-                    <SelectItem value="0">
-                      <div className="flex flex-row items-center gap-4">
-                        Sin proceso padre
-                      </div>
-                    </SelectItem>
                     {processes.map(process => (
                       <SelectItem value={String(process.id)} key={process.id}>
                         <div className="flex flex-row items-center gap-4">

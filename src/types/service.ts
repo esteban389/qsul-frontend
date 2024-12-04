@@ -17,3 +17,9 @@ export type CreateServiceRequest = {
   icon: File;
   process_id: number;
 };
+
+export type UpdateServiceRequest = {
+  name: string;
+  icon: File | null | undefined;
+  process_id: number;
+};
