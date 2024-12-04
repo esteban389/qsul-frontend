@@ -62,11 +62,7 @@ const routeGroups: RouteGroup[] = [
         name: 'processes',
         path: '/procesos',
         icon: LayoutPanelTop,
-        authorizedRoles: [
-          Role.NATIONAL_COORDINATOR,
-          Role.CAMPUS_COORDINATOR,
-          Role.PROCESS_LEADER,
-        ],
+        authorizedRoles: [Role.NATIONAL_COORDINATOR, Role.CAMPUS_COORDINATOR],
       },
       {
         displayName: 'Servicios',
@@ -170,8 +166,17 @@ const routeGroups: RouteGroup[] = [
   },
 ];
 
-export const getRouteByName = (name: string) => {
-  return routeGroups.find(route => route.name === name);
+export const useRouteByPath = (name: string) => {
+  const routes = useUserRoutes();
+  let route: Route | undefined;
+  routes.forEach(group => {
+    group.routes.forEach(r => {
+      if (r.path === name) {
+        route = r;
+      }
+    });
+  });
+  return route;
 };
 
 export const useUserRoutes = (): RouteGroup[] => {

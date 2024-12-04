@@ -1,4 +1,4 @@
-import { Service } from '@/types/service';
+import type { Service } from '@/types/service';
 
 export type Process = {
   id: number;

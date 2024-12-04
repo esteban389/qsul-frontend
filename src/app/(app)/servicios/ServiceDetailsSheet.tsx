@@ -13,9 +13,8 @@ import env from '@/lib/env';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  OptionalProcessIconSchema,
-  ProcessIconSchema,
-  ProcessNameSchema,
+  CampusNameSchema,
+  OptionalCampusIconSchema,
 } from '@/Schemas/UniversitySchema';
 import { safeParse } from 'valibot';
 import { useAuthorize } from '@/lib/authorizations';
@@ -37,8 +36,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Process } from '@/types/process';
-import useProcessByToken from '@/app/(app)/procesos/useProcessByToken';
 import {
   Select,
   SelectContent,
@@ -50,29 +47,30 @@ import {
 import useProcesses from '@/app/(app)/procesos/useProcesses';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Service } from '@/types/service';
 
-export default function ProcessDetailsSheet({
-  process,
+export default function ServiceDetailsSheet({
+  service,
   children,
 }: Readonly<{
-  process: Process;
+  service: Service;
   children: ReactNode;
 }>) {
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent className="flex h-full flex-col">
-        <ProcessSheetContent process={process} />
+        <ProcessSheetContent service={service} />
       </SheetContent>
     </Sheet>
   );
 }
 
-function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
-  const imgSrc = process.icon ? env('API_URL') + process.icon : '/';
+function ProcessSheetContent({ service }: Readonly<{ service: Service }>) {
+  const imgSrc = service.icon ? env('API_URL') + service.icon : '/';
   const [icon, setIcon] = useState<File | null>();
-  const [name, setName] = useState(process.name);
-  const [parent, setParent] = useState<number | null>(process.parent_id);
+  const [name, setName] = useState(service.name);
+  const [parent, setParent] = useState<number | null>(service.process_id);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   const can = useAuthorize();
@@ -83,23 +81,18 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
   } = useProcesses({
     deleted_at: 'null',
   });
-  const updateMutation = useUpdateProcess(process.id, {
+  const updateMutation = useUpdateProcess(service.id, {
     icon,
     name,
     parent_id: parent === 0 ? null : parent,
   });
-  const {
-    data: processDetails,
-    isPending,
-    isSuccess,
-  } = useProcessByToken(process.token);
 
-  const deleteMutation = useDeleteProcess(process.id);
-  const restoreMutation = useRestoreProcess(process.id);
+  const deleteMutation = useDeleteProcess(service.id);
+  const restoreMutation = useRestoreProcess(service.id);
 
   const onUpdate = () => {
-    const iconResult = safeParse(OptionalProcessIconSchema, icon);
-    const nameResult = safeParse(ProcessNameSchema, name);
+    const iconResult = safeParse(OptionalCampusIconSchema, icon);
+    const nameResult = safeParse(CampusNameSchema, name);
     if (!iconResult.success || !nameResult.success) {
       setErrors({
         icon: iconResult.success ? undefined : iconResult.issues[0].message,
@@ -108,8 +101,8 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
       return;
     }
     toast.promise(updateMutation.mutateAsync(), {
-      loading: `Actualizando a ${process.name}`,
-      success: `${process.name} ha sido actualizado`,
+      loading: `Actualizando a ${service.name}`,
+      success: `${service.name} ha sido actualizado`,
       error: error => {
         if (error instanceof AxiosError) {
           const body = error.response?.data;
@@ -118,15 +111,15 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
           }
           return `Ocurrió un error inesperado: ${error.message}`;
         }
-        return `Error al actualizar a ${process.name}`;
+        return `Error al actualizar a ${service.name}`;
       },
     });
   };
 
   const onDelete = () => {
     toast.promise(deleteMutation.mutateAsync(), {
-      loading: `Eliminando a ${process.name}`,
-      success: `${process.name} ha sido eliminado`,
+      loading: `Eliminando a ${service.name}`,
+      success: `${service.name} ha sido eliminado`,
       error: error => {
         if (error instanceof AxiosError) {
           const body = error.response?.data;
@@ -135,16 +128,16 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
           }
           return `Ocurrió un error inesperado: ${error.message}`;
         }
-        return `Error al eliminar a ${process.name}`;
+        return `Error al eliminar a ${service.name}`;
       },
     });
   };
 
   const onRestore = () => {
     toast.promise(restoreMutation.mutateAsync(), {
-      loading: `Restaurando a ${process.name}`,
-      success: `${process.name} ha sido restaurado`,
-      error: `Error al restaurar a ${process.name}`,
+      loading: `Restaurando a ${service.name}`,
+      success: `${service.name} ha sido restaurado`,
+      error: `Error al restaurar a ${service.name}`,
     });
   };
 
@@ -152,7 +145,7 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
     const { files } = e.target;
     const file = files && files[0];
     setIcon(file);
-    const result = safeParse(ProcessIconSchema, file);
+    const result = safeParse(OptionalCampusIconSchema, file);
     if (result.success) {
       setErrors({
         ...errors,
@@ -169,7 +162,7 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setName(value);
-    const result = safeParse(ProcessNameSchema, value);
+    const result = safeParse(CampusNameSchema, value);
     if (result.success) {
       setErrors({
         ...errors,
@@ -193,21 +186,23 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
 
   return (
     <>
-      <SheetTitle>Detalles: {process.name}</SheetTitle>
+      <SheetTitle>Detalles: {service.name}</SheetTitle>
       <ScrollArea className="h-full">
         <div className="grow space-y-4 p-4">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-center space-x-4">
             <Avatar>
               <AvatarImage
                 src={icon ? URL.createObjectURL(icon) : imgSrc}
-                alt={process.name}
+                alt={service.name}
               />
-              <AvatarFallback>{getInitials(process.name)}</AvatarFallback>
+              <AvatarFallback>{getInitials(service.name)}</AvatarFallback>
             </Avatar>
-            <div>
-              <Input name="icon" onChange={onIconChange} type="file" />
-              {errors?.icon && <ErrorText>{errors.icon}</ErrorText>}
-            </div>
+            {can('update', 'service') && (
+              <div>
+                <Input name="icon" onChange={onIconChange} type="file" />
+                {errors?.icon && <ErrorText>{errors.icon}</ErrorText>}
+              </div>
+            )}
           </div>
           <div>
             <Label htmlFor="name">Nombre</Label>
@@ -226,10 +221,10 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
               <Select
                 name="parent"
                 onValueChange={onProcessChange}
-                disabled={!can('update', 'process')}
+                disabled={!can('update', 'service')}
                 value={parent ? String(parent) : undefined}>
                 <SelectTrigger className="h-fit">
-                  <SelectValue placeholder="Asociar con un proceso padre" />
+                  <SelectValue placeholder="Asociar con un proceso" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
                   <SelectGroup>
@@ -263,83 +258,23 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
               {errors?.parent && <ErrorText>{errors.parent}</ErrorText>}
             </div>
           )}
-          {isPending && (
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-14 w-full" />
-            </div>
-          )}
-          {isSuccess && processDetails.sub_processes.length > 0 && (
-            <div>
-              <Label>Sub procesos</Label>
-              <ul className="w-full space-y-4">
-                {processDetails.sub_processes.map(subProcess => (
-                  <li
-                    key={subProcess.id}
-                    className="flex w-full flex-row items-center gap-4 rounded border border-input p-2">
-                    <Avatar>
-                      <AvatarImage
-                        src={
-                          subProcess.icon
-                            ? env('API_URL') + subProcess.icon
-                            : undefined
-                        }
-                      />
-                      <AvatarFallback>
-                        {getInitials(process.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {subProcess.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {isSuccess && processDetails.services.length > 0 && (
-            <div>
-              <Label>Servicios</Label>
-              <ul className="w-full space-y-4">
-                {processDetails.services.map(service => (
-                  <li
-                    key={service.id}
-                    className="flex w-full flex-row items-center gap-4 rounded border border-input p-2">
-                    <Avatar>
-                      <AvatarImage
-                        src={
-                          service.icon
-                            ? env('API_URL') + service.icon
-                            : undefined
-                        }
-                      />
-                      <AvatarFallback>
-                        {getInitials(process.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {service.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       </ScrollArea>
       <SheetFooter>
-        {can('delete', 'process') && (
+        {can('delete', 'service') && (
           <SheetClose asChild>
-            {process.deleted_at ? (
+            {service.deleted_at ? (
               <Button variant="ghost" onClick={onRestore}>
                 Restaurar
               </Button>
             ) : (
-              <DeleteProcessAlert name={process.name} action={onDelete}>
+              <DeleteProcessAlert name={service.name} action={onDelete}>
                 <Button variant="destructive">Eliminar</Button>
               </DeleteProcessAlert>
             )}
           </SheetClose>
         )}
-        {can('update', 'process') && (
+        {can('update', 'service') && (
           <SheetClose asChild>
             <Button onClick={onUpdate}>Actualizar</Button>
           </SheetClose>

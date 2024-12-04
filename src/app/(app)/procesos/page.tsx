@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/table';
 import { Fish, Search } from 'lucide-react';
 import {
+  OptionalProcessIconSchema,
   ProcessIconSchema,
   ProcessNameSchema,
 } from '@/Schemas/UniversitySchema';
@@ -78,11 +79,11 @@ function CampusPage() {
   return (
     <main className="mx-4 flex h-full flex-col items-center space-y-6 py-8">
       <h1 className="w-full text-center text-3xl font-bold">
-        Administrar usuarios
+        Administrar procesos
       </h1>
       <div className="w-full max-w-[90%] space-y-4">
         <div className="flex w-full flex-col justify-between gap-4 md:flex-row">
-          {can('create', 'user') && (
+          {can('create', 'process') && (
             <Credenza>
               <CredenzaTrigger asChild>
                 <Button>Crear proceso</Button>
@@ -131,7 +132,7 @@ function CampusPage() {
             <TableBody>
               {processesQuery.isSuccess && table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map(row => (
-                  <ProcessDetailsSheet process={row.original}>
+                  <ProcessDetailsSheet process={row.original} key={row.id}>
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && 'selected'}>
@@ -154,7 +155,7 @@ function CampusPage() {
                     <div className="flex w-full flex-col items-center justify-center py-8">
                       <Fish className="size-28 transition hover:-scale-x-100" />
                       <p className="ml-4 text-lg font-semibold">
-                        Upps, parece que no hay seccionales
+                        Upps, parece que no hay procesos
                       </p>
                     </div>
                   </TableCell>
@@ -199,12 +200,12 @@ function CreateProcessModal() {
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const nameResult = safeParse(ProcessNameSchema, name);
-    const iconResult = safeParse(ProcessIconSchema, icon);
+    const iconResult = safeParse(OptionalProcessIconSchema, icon);
     if (nameResult.success && iconResult.success) {
       toast.promise(createUserMutation.mutateAsync(), {
-        loading: 'Creando seccional...',
-        success: 'Seccional creado correctamente',
-        error: 'Error al crear la seccional',
+        loading: 'Creando proceso...',
+        success: 'Proceso creado correctamente',
+        error: 'Error al crear el proceso',
       });
       return;
     }
@@ -260,23 +261,23 @@ function CreateProcessModal() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4 p-12">
-      <CredenzaTitle className="mb-4">Crear Seccional</CredenzaTitle>
+      <CredenzaTitle className="mb-4">Crear Proceso</CredenzaTitle>
       <CredenzaDescription className="sr-only">
-        Crear un seccional
+        Crear un proceso
       </CredenzaDescription>
       <div>
         <Label htmlFor="name">Nombre</Label>
         <Input
           name="name"
-          placeholder="Cúcuta"
+          placeholder="Docencia"
           value={name}
           onChange={onNameChange}
         />
         {errors.name && <ErrorText>{errors.name}</ErrorText>}
       </div>
       <div>
-        <Label htmlFor="avatar">Ícono del campus</Label>
-        <Input name="avatar" type="file" onChange={onIconChange} />
+        <Label htmlFor="icon">Ícono del campus</Label>
+        <Input name="icon" type="file" onChange={onIconChange} />
         {errors.icon && <ErrorText>{errors.icon}</ErrorText>}
       </div>
       <div>
@@ -288,7 +289,7 @@ function CreateProcessModal() {
             <SelectGroup>
               {isSuccess &&
                 processes.map(process => (
-                  <SelectItem value={String(process.id)}>
+                  <SelectItem value={String(process.id)} key={process.id}>
                     <div className="flex flex-row items-center gap-4">
                       <Avatar>
                         <AvatarImage

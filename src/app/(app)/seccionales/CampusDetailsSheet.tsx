@@ -15,8 +15,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   CampusAddressSchema,
+  CampusIconSchema,
   CampusNameSchema,
-  OptionalCampusIconScheme,
+  OptionalCampusIconSchema,
 } from '@/Schemas/UniversitySchema';
 import { safeParse } from 'valibot';
 import { useAuthorize } from '@/lib/authorizations';
@@ -42,10 +43,10 @@ import {
 export default function CampusDetailsSheet({
   campus,
   children,
-}: {
+}: Readonly<{
   campus: Campus;
   children: ReactNode;
-}) {
+}>) {
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
@@ -56,7 +57,7 @@ export default function CampusDetailsSheet({
   );
 }
 
-function CampusSheetContent({ campus }: { campus: Campus }) {
+function CampusSheetContent({ campus }: Readonly<{ campus: Campus }>) {
   const imgSrc = campus.icon ? env('API_URL') + campus.icon : '/';
   const [icon, setIcon] = useState<File | null>();
   const [name, setName] = useState(campus.name);
@@ -73,7 +74,7 @@ function CampusSheetContent({ campus }: { campus: Campus }) {
   const restoreMutation = useRestoreCampus(campus.id);
 
   const onUpdate = () => {
-    const iconResult = safeParse(OptionalCampusIconScheme, icon);
+    const iconResult = safeParse(OptionalCampusIconSchema, icon);
     const nameResult = safeParse(CampusNameSchema, name);
     const addressResult = safeParse(CampusAddressSchema, address);
     if (!iconResult.success || !nameResult.success || !addressResult.success) {
@@ -131,7 +132,7 @@ function CampusSheetContent({ campus }: { campus: Campus }) {
     const { files } = e.target;
     const file = files && files[0];
     setIcon(file);
-    const result = safeParse(OptionalCampusIconScheme, file);
+    const result = safeParse(CampusIconSchema, file);
     if (result.success) {
       setErrors({
         ...errors,
@@ -190,10 +191,12 @@ function CampusSheetContent({ campus }: { campus: Campus }) {
             />
             <AvatarFallback>{getInitials(campus.name)}</AvatarFallback>
           </Avatar>
-          <div>
-            <Input name="icon" onChange={onIconChange} type="file" />
-            {errors?.icon && <ErrorText>{errors.icon}</ErrorText>}
-          </div>
+          {can('update', 'campus') && (
+            <div>
+              <Input name="icon" onChange={onIconChange} type="file" />
+              {errors?.icon && <ErrorText>{errors.icon}</ErrorText>}
+            </div>
+          )}
         </div>
         <div>
           <Label htmlFor="name">Nombre</Label>
@@ -233,11 +236,11 @@ function DeleteCampusAlert({
   children,
   name,
   action,
-}: {
+}: Readonly<{
   children: ReactNode;
   name: string;
   action: () => void;
-}) {
+}>) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
