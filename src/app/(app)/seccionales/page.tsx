@@ -286,7 +286,7 @@ function CreateCampusModal() {
         {errors.address && <ErrorText>{errors.address}</ErrorText>}
       </div>
       <div>
-        <Label htmlFor="avatar">Ícono del campus</Label>
+        <Label htmlFor="avatar">Ícono de la seccional</Label>
         <Input name="avatar" type="file" onChange={onIconChange} />
         {errors.icon && <ErrorText>{errors.icon}</ErrorText>}
       </div>

@@ -338,7 +338,7 @@ function CreateUserModal() {
         <div>
           <Select onValueChange={onCampusChange}>
             <SelectTrigger className="h-fit">
-              <SelectValue placeholder="Seleccionar campus" />
+              <SelectValue placeholder="Seleccionar seccional" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
