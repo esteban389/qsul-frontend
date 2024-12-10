@@ -3,7 +3,11 @@ import backendClient from '@/services/backendClient';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 function sendRequest(id: number, request: UpdateProcessRequest) {
-  return backendClient.post(`/api/processes/${id}`, request);
+  return backendClient.post(`/api/processes/${id}`, request, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 }
 
 export default function useUpdateProcess(

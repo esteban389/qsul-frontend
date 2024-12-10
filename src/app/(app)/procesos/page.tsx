@@ -191,7 +191,7 @@ function CreateProcessModal() {
   const [parent, setParent] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const { data: processes, isSuccess } = useProcesses({ deleted_at: 'null' });
-  const createUserMutation = useCreateProcess({
+  const createProcessMutation = useCreateProcess({
     name,
     icon,
     parent_id: parent,
@@ -202,7 +202,7 @@ function CreateProcessModal() {
     const nameResult = safeParse(ProcessNameSchema, name);
     const iconResult = safeParse(OptionalProcessIconSchema, icon);
     if (nameResult.success && iconResult.success) {
-      toast.promise(createUserMutation.mutateAsync(), {
+      toast.promise(createProcessMutation.mutateAsync(), {
         loading: 'Creando proceso...',
         success: 'Proceso creado correctamente',
         error: 'Error al crear el proceso',

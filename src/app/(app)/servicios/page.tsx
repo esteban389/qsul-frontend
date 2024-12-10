@@ -35,11 +35,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Fish, Search } from 'lucide-react';
+import { Search, Squirrel } from 'lucide-react';
 import {
-  OptionalServiceIconSchema,
   ServiceIconSchema,
   ServiceNameSchema,
+  ServiceProcessSchema,
 } from '@/Schemas/UniversitySchema';
 import {
   Select,
@@ -154,7 +154,7 @@ function CampusPage() {
                     colSpan={table.getVisibleFlatColumns().length}
                     className="h-24">
                     <div className="flex w-full flex-col items-center justify-center py-8">
-                      <Fish className="size-28 transition hover:-scale-x-100" />
+                      <Squirrel className="size-28 transition hover:-scale-x-100" />
                       <p className="ml-4 text-lg font-semibold">
                         Upps, parece que no hay servicios
                       </p>
@@ -192,7 +192,7 @@ function CreateServiceModal() {
   const [process, setProcess] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const { data: processes, isSuccess } = useProcesses({ deleted_at: 'null' });
-  const createUserMutation = useCreateService({
+  const createServiceMutation = useCreateService({
     name,
     icon: icon as File,
     process_id: process as number,
@@ -201,9 +201,10 @@ function CreateServiceModal() {
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const nameResult = safeParse(ServiceNameSchema, name);
-    const iconResult = safeParse(OptionalServiceIconSchema, icon);
-    if (nameResult.success && iconResult.success) {
-      toast.promise(createUserMutation.mutateAsync(), {
+    const iconResult = safeParse(ServiceIconSchema, icon);
+    const processResult = safeParse(ServiceProcessSchema, process);
+    if (nameResult.success && iconResult.success && processResult.success) {
+      toast.promise(createServiceMutation.mutateAsync(), {
         loading: 'Creando seccional...',
         success: 'Seccional creado correctamente',
         error: 'Error al crear la seccional',
@@ -213,6 +214,7 @@ function CreateServiceModal() {
     setErrors({
       name: nameResult.issues && nameResult.issues[0].message,
       icon: iconResult.issues && iconResult.issues[0].message,
+      parent: processResult.issues && processResult.issues[0].message,
     });
   };
 
@@ -277,7 +279,7 @@ function CreateServiceModal() {
         {errors.name && <ErrorText>{errors.name}</ErrorText>}
       </div>
       <div>
-        <Label htmlFor="icon">Ícono del campus</Label>
+        <Label htmlFor="icon">Ícono del servicio</Label>
         <Input name="icon" type="file" onChange={onIconChange} />
         {errors.icon && <ErrorText>{errors.icon}</ErrorText>}
       </div>
@@ -311,6 +313,7 @@ function CreateServiceModal() {
             </SelectGroup>
           </SelectContent>
         </Select>
+        {errors.parent && <ErrorText>{errors.parent}</ErrorText>}
       </div>
       <div className="flex w-full justify-center">
         <Button>Guardar</Button>

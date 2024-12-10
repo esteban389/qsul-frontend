@@ -5,9 +5,9 @@ import { ArrowDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import env from '@/lib/env';
-import { Service } from '@/types/service';
+import { Employee } from '@/types/employee';
 
-const columns: ColumnDef<Service>[] = [
+const columns: ColumnDef<Employee>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -32,7 +32,9 @@ const columns: ColumnDef<Service>[] = [
         <Avatar>
           <AvatarImage
             src={
-              row.original.icon ? env('API_URL') + row.original.icon : undefined
+              row.original.avatar
+                ? env('API_URL') + row.original.avatar
+                : undefined
             }
           />
           <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>

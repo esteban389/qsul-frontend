@@ -13,8 +13,8 @@ import env from '@/lib/env';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  CampusNameSchema,
-  OptionalCampusIconSchema,
+  OptionalServiceIconSchema,
+  ServiceNameSchema,
 } from '@/Schemas/UniversitySchema';
 import { safeParse } from 'valibot';
 import { useAuthorize } from '@/lib/authorizations';
@@ -91,8 +91,8 @@ function ServiceSheetContent({ service }: Readonly<{ service: Service }>) {
   const restoreMutation = useRestoreService(service.id);
 
   const onUpdate = () => {
-    const iconResult = safeParse(OptionalCampusIconSchema, icon);
-    const nameResult = safeParse(CampusNameSchema, name);
+    const iconResult = safeParse(OptionalServiceIconSchema, icon);
+    const nameResult = safeParse(ServiceNameSchema, name);
     if (!iconResult.success || !nameResult.success) {
       setErrors({
         icon: iconResult.success ? undefined : iconResult.issues[0].message,
@@ -145,7 +145,7 @@ function ServiceSheetContent({ service }: Readonly<{ service: Service }>) {
     const { files } = e.target;
     const file = files && files[0];
     setIcon(file);
-    const result = safeParse(OptionalCampusIconSchema, file);
+    const result = safeParse(OptionalServiceIconSchema, file);
     if (result.success) {
       setErrors({
         ...errors,
@@ -162,7 +162,7 @@ function ServiceSheetContent({ service }: Readonly<{ service: Service }>) {
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setName(value);
-    const result = safeParse(CampusNameSchema, value);
+    const result = safeParse(ServiceNameSchema, value);
     if (result.success) {
       setErrors({
         ...errors,
@@ -183,7 +183,6 @@ function ServiceSheetContent({ service }: Readonly<{ service: Service }>) {
       parent: undefined,
     });
   };
-
   return (
     <>
       <SheetTitle>Detalles: {service.name}</SheetTitle>
@@ -206,7 +205,12 @@ function ServiceSheetContent({ service }: Readonly<{ service: Service }>) {
           </div>
           <div>
             <Label htmlFor="name">Nombre</Label>
-            <Input value={name} name="name" onChange={onNameChange} />
+            <Input
+              value={name}
+              name="name"
+              onChange={onNameChange}
+              disabled={!can('update', 'service')}
+            />
             {errors?.name && <ErrorText>{errors.name}</ErrorText>}
           </div>
           {isProcessesPending && (

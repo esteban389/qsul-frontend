@@ -196,7 +196,7 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
       <SheetTitle>Detalles: {process.name}</SheetTitle>
       <ScrollArea className="h-full">
         <div className="grow space-y-4 p-4">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-center space-x-4">
             <Avatar>
               <AvatarImage
                 src={icon ? URL.createObjectURL(icon) : imgSrc}
@@ -204,14 +204,21 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
               />
               <AvatarFallback>{getInitials(process.name)}</AvatarFallback>
             </Avatar>
-            <div>
-              <Input name="icon" onChange={onIconChange} type="file" />
-              {errors?.icon && <ErrorText>{errors.icon}</ErrorText>}
-            </div>
+            {can('update', 'process') && (
+              <div>
+                <Input name="icon" onChange={onIconChange} type="file" />
+                {errors?.icon && <ErrorText>{errors.icon}</ErrorText>}
+              </div>
+            )}
           </div>
           <div>
             <Label htmlFor="name">Nombre</Label>
-            <Input value={name} name="name" onChange={onNameChange} />
+            <Input
+              value={name}
+              name="name"
+              onChange={onNameChange}
+              disabled={!can('update', 'process')}
+            />
             {errors?.name && <ErrorText>{errors.name}</ErrorText>}
           </div>
           {isProcessesPending && (
@@ -314,7 +321,7 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
                         }
                       />
                       <AvatarFallback>
-                        {getInitials(process.name)}
+                        {getInitials(service.name)}
                       </AvatarFallback>
                     </Avatar>
                     {service.name}

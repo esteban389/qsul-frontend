@@ -80,11 +80,7 @@ const routeGroups: RouteGroup[] = [
         name: 'employees',
         path: '/empleados',
         icon: BriefcaseBusiness,
-        authorizedRoles: [
-          Role.NATIONAL_COORDINATOR,
-          Role.CAMPUS_COORDINATOR,
-          Role.PROCESS_LEADER,
-        ],
+        authorizedRoles: [Role.CAMPUS_COORDINATOR, Role.PROCESS_LEADER],
       },
     ],
   },

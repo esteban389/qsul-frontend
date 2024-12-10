@@ -2,10 +2,10 @@ import backendClient from '@/services/backendClient';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 function sendRequest(id: number) {
-  return backendClient.delete(`/api/services/${id}`);
+  return backendClient.delete(`/api/employees/${id}`);
 }
 
-export default function useDeleteService(id: number) {
+export default function useDeleteEmployee(id: number) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => sendRequest(id),
