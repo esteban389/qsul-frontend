@@ -10,6 +10,7 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
+  Table as TanTable,
 } from '@tanstack/react-table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ import { Label } from '@/components/ui/label';
 import ErrorText from '@/components/ui/ErrorText';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn, getInitials } from '@/lib/utils';
 import {
   Table,
@@ -55,15 +57,126 @@ import env from '@/lib/env';
 import useProcesses from '@/app/(app)/procesos/useProcesses';
 import useEmployees from '@/app/(app)/empleados/useEmployees';
 import useCreateEmployee from '@/app/(app)/empleados/useCreateEmployee';
+import QueryRenderer from '@/components/QueryRenderer';
+import LoadingContent from '@/components/LoadingContent';
+import { Employee } from '@/types/employee';
 import columns from './TableDefinition';
 import EmployeeDetailsSheet from './EmployeeDetailsSheet';
+
+function EmptyContent() {
+  return (
+    <motion.div
+      className="flex w-full flex-col items-center justify-center py-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}>
+      <motion.div
+        animate={{
+          scale: [1, 1.1, 1],
+          rotate: [0, -10, 10, -10, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          repeatType: 'reverse',
+        }}>
+        <Bird className="size-28 transition-transform" />
+      </motion.div>
+      <motion.p
+        className="ml-4 text-lg font-semibold"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}>
+        Upps, parece que no hay empleados
+      </motion.p>
+    </motion.div>
+  );
+}
+
+function Loading() {
+  return (
+    <div className="flex size-full items-center justify-center">
+      <LoadingContent />
+    </div>
+  );
+}
+// Success component that handles the table
+const EmployeesTable = ({ table }: { table: TanTable<Employee> }) => {
+  return (
+    <>
+      <ScrollArea
+        className={cn('w-full rounded-md border-2 border-secondary shadow-md')}>
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            <AnimatePresence>
+              {table.getRowModel().rows.map((row, index) => (
+                <EmployeeDetailsSheet
+                  key={row.id}
+                  employee={row.original}>
+                  <motion.tr
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ delay: index * 0.1 }}
+                    className={row.getIsSelected() ? 'selected' : ''}>
+                    {row.getVisibleCells().map(cell => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </motion.tr>
+                </EmployeeDetailsSheet>
+              ))}
+            </AnimatePresence>
+          </TableBody>
+        </Table>
+      </ScrollArea >
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}>
+          Anterior
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}>
+          Siguiente
+        </Button>
+      </div>
+    </>
+  );
+};
 
 function EmployeePage() {
   const employeesQuery = useEmployees({ include: ['process', 'services'] });
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const can = useAuthorize();
   const table = useReactTable({
-    data: employeesQuery.data || [],
+    data: employeesQuery.data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -76,27 +189,49 @@ function EmployeePage() {
       columnFilters,
     },
   });
-  const can = useAuthorize();
 
   return (
-    <main className="mx-4 flex h-full flex-col items-center space-y-6 py-8">
-      <h1 className="w-full text-center text-3xl font-bold">
+    <motion.main
+      className="mx-4 flex h-full flex-col items-center space-y-6 py-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}>
+      <motion.h1
+        className="w-full text-center text-3xl font-bold"
+        initial={{ y: -20 }}
+        animate={{ y: 0 }}
+        transition={{ type: 'spring', stiffness: 100 }}>
         Administrar empleados
-      </h1>
-      <div className="w-full max-w-[90%] space-y-4">
-        <div className="flex w-full flex-col justify-between gap-4 md:flex-row">
+      </motion.h1>
+      <motion.div
+        className="size-full max-w-[90%] space-y-4"
+        initial={{ scale: 0.95 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.3 }}>
+        <motion.div
+          className="flex w-full flex-col justify-between gap-4 md:flex-row"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}>
           {can('create', 'employee') && (
             <Credenza>
               <CredenzaTrigger asChild>
-                <Button>Crear empleado</Button>
+                <Button className="transition-transform hover:scale-105">
+                  Crear empleado
+                </Button>
               </CredenzaTrigger>
               <CredenzaContent>
                 <CreateServiceModal />
               </CredenzaContent>
             </Credenza>
           )}
-          <div className="relative w-full max-w-lg">
+          <motion.div
+            className="relative w-full max-w-lg"
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}>
             <Input
+              className="pr-10 transition-all focus:ring-2 focus:ring-primary/30"
               placeholder="Armando Casas"
               value={
                 (table.getColumn('name')?.getFilterValue() as string) ?? ''
@@ -106,84 +241,36 @@ function EmployeePage() {
               }
             />
             <Search className="pointer-events-none absolute inset-y-0 right-0 mr-2 h-full text-muted-foreground" />
-          </div>
-        </div>
-        <ScrollArea
-          className={cn(
-            'w-full rounded-md border-2 border-secondary shadow-md',
-          )}>
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map(headerGroup => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map(header => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {employeesQuery.isSuccess && table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map(row => (
-                  <EmployeeDetailsSheet key={row.id} employee={row.original}>
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && 'selected'}>
-                      {row.getVisibleCells().map(cell => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </EmployeeDetailsSheet>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={table.getVisibleFlatColumns().length}
-                    className="h-24">
-                    <div className="flex w-full flex-col items-center justify-center py-8">
-                      <Bird className="size-28 transition hover:-scale-x-100" />
-                      <p className="ml-4 text-lg font-semibold">
-                        Upps, parece que no hay empleados
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}>
-            Anterior
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}>
-            Siguiente
-          </Button>
-        </div>
-      </div>
-    </main>
+          </motion.div>
+        </motion.div>
+        <QueryRenderer
+          query={employeesQuery}
+          config={{
+            preferCacheOverFetch: false,
+            pending: Loading,
+            success: EmployeesTable,
+            error: ({ error, retry }) => (
+              <motion.div
+                className="text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}>
+                <p>Error: {error.message}</p>
+                <Button
+                  onClick={retry}
+                  className="transition-transform hover:scale-105">
+                  Retry
+                </Button>
+              </motion.div>
+            ),
+            empty: EmptyContent,
+          }}
+          successProps={{
+            table,
+          }}
+        />
+      </motion.div>
+    </motion.main>
   );
 }
 
@@ -208,9 +295,9 @@ function CreateServiceModal() {
     const processResult = safeParse(EmployeeProcessSchema, process);
     if (nameResult.success && iconResult.success && processResult.success) {
       toast.promise(createEmployeeMutation.mutateAsync(), {
-        loading: 'Creando seccional...',
-        success: 'Seccional creado correctamente',
-        error: 'Error al crear la seccional',
+        loading: 'Creando empleado...',
+        success: 'Empleado creado correctamente',
+        error: 'Error al crear el empleado',
       });
       return;
     }
@@ -284,7 +371,7 @@ function CreateServiceModal() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4 p-12">
-      <CredenzaTitle className="mb-4">Crear un servicio</CredenzaTitle>
+      <CredenzaTitle className="mb-4">Registrar empleado</CredenzaTitle>
       <CredenzaDescription className="sr-only">
         Crear un empleado
       </CredenzaDescription>

@@ -6,7 +6,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { ChangeEvent, ReactNode, useState } from 'react';
+import { ChangeEvent, MouseEvent, ReactNode, useState } from 'react';
 import { getInitials } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import env from '@/lib/env';
@@ -98,7 +98,7 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
   const deleteMutation = useDeleteEmployee(employee.id);
   const restoreMutation = useRestoreEmployee(employee.id);
 
-  const onUpdate = () => {
+  const onUpdate = (e: MouseEvent) => {
     const avatarResult = safeParse(OptionalEmployeeAvatarSchema, avatar);
     const nameResult = safeParse(EmployeeNameSchema, name);
     const emailResult = safeParse(EmployeeEmailSchema, email);
@@ -110,6 +110,8 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
         name: nameResult.success ? undefined : nameResult.issues[0].message,
         email: emailResult.success ? undefined : emailResult.issues[0].message,
       });
+      e.stopPropagation();
+      e.preventDefault();
       return;
     }
     toast.promise(updateMutation.mutateAsync(), {
