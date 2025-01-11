@@ -64,6 +64,9 @@ export function convertBinaryUnits(
   const factor = 1024 ** (fromIndex - toIndex);
   return value * factor;
 }
+export function formatDate(date: string, options: Intl.DateTimeFormatOptions): string {
+  return new Intl.DateTimeFormat('es-CO', options).format(new Date(date));
+}
 
 export const RolesTranslations = {
   [Role.NATIONAL_COORDINATOR]: 'Coordinador nacional',
