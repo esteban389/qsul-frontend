@@ -1,7 +1,13 @@
 import { Role } from '@/types/user';
 import useAuth from '@/hooks/useAuth';
 
-export type entities = 'user' | 'campus' | 'employee' | 'process' | 'service';
+export type entities =
+  | 'user'
+  | 'campus'
+  | 'employee'
+  | 'process'
+  | 'service'
+  | 'survey';
 
 export type operations = 'create' | 'read' | 'update' | 'delete';
 
@@ -21,10 +27,7 @@ const authorizations: RoleAuthorization = {
     { entity: 'campus', operation: 'read' },
     { entity: 'campus', operation: 'update' },
     { entity: 'campus', operation: 'delete' },
-    { entity: 'employee', operation: 'create' },
     { entity: 'employee', operation: 'read' },
-    { entity: 'employee', operation: 'update' },
-    { entity: 'employee', operation: 'delete' },
     { entity: 'process', operation: 'create' },
     { entity: 'process', operation: 'read' },
     { entity: 'process', operation: 'update' },
@@ -33,6 +36,10 @@ const authorizations: RoleAuthorization = {
     { entity: 'service', operation: 'read' },
     { entity: 'service', operation: 'update' },
     { entity: 'service', operation: 'delete' },
+    { entity: 'survey', operation: 'create' },
+    { entity: 'survey', operation: 'read' },
+    { entity: 'survey', operation: 'update' },
+    { entity: 'survey', operation: 'delete' },
   ],
   [Role.CAMPUS_COORDINATOR]: [
     { entity: 'user', operation: 'create' },

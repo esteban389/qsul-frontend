@@ -66,7 +66,7 @@ function AppSidebarItem({ route }: { route: Route }) {
           href={route.path}
           className={
             pathname === route.path
-              ? 'border-2 border-primary-foreground bg-background shadow-md'
+              ? 'border-2 border-primary-foreground bg-background shadow-md hover:bg-background'
               : undefined
           }>
           <Icon /> {route.displayName}

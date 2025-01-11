@@ -9,12 +9,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import RouteBreadcrumb from '@/components/RouteBreadcrumb';
 import { useRouteByPath } from '@/lib/routes';
 import { notFound, usePathname } from 'next/navigation';
+import LoadingApplication from '@/components/LoadingApplication';
 
 function AppLayout({ children }: Readonly<{ children: ReactNode }>) {
   const { user, logout } = useAuth({ middleware: 'auth' });
   const pathname = usePathname();
   const route = useRouteByPath(pathname);
-  if (!user) return null;
+  if (!user) return <LoadingApplication />;
   if (!route) throw notFound();
   return (
     <SidebarProvider>

@@ -80,7 +80,11 @@ const routeGroups: RouteGroup[] = [
         name: 'employees',
         path: '/empleados',
         icon: BriefcaseBusiness,
-        authorizedRoles: [Role.CAMPUS_COORDINATOR, Role.PROCESS_LEADER],
+        authorizedRoles: [
+          Role.NATIONAL_COORDINATOR,
+          Role.CAMPUS_COORDINATOR,
+          Role.PROCESS_LEADER,
+        ],
       },
     ],
   },
@@ -93,7 +97,11 @@ const routeGroups: RouteGroup[] = [
         name: 'questions',
         path: '/preguntas',
         icon: FilePenLine,
-        authorizedRoles: [Role.NATIONAL_COORDINATOR],
+        authorizedRoles: [
+          Role.NATIONAL_COORDINATOR,
+          Role.CAMPUS_COORDINATOR,
+          Role.PROCESS_LEADER,
+        ],
       },
       {
         displayName: 'Reporte general',
@@ -161,7 +169,13 @@ const routeGroups: RouteGroup[] = [
     ],
   },
 ];
-
+/*
+|-----------------------------------------------------------------------------
+| Hook to get the route by its path
+|-----------------------------------------------------------------------------
+|
+| Search in the existing routes for the one that matches the given path.
+*/
 export const useRouteByPath = (name: string) => {
   const routes = useUserRoutes();
   let route: Route | undefined;
@@ -174,7 +188,13 @@ export const useRouteByPath = (name: string) => {
   });
   return route;
 };
-
+/*
+|-----------------------------------------------------------------------------
+| Hook to get the routes that the authenticated user can access
+|-----------------------------------------------------------------------------
+|
+| Returns the list of routes the current is authorized to access.
+*/
 export const useUserRoutes = (): RouteGroup[] => {
   const { user } = useAuth({ middleware: 'auth' });
   if (!user) return [];
@@ -187,4 +207,9 @@ export const useUserRoutes = (): RouteGroup[] => {
       ),
     }))
     .filter(group => group.routes.length > 0);
+};
+
+export const findByName = (name: string): Route | undefined => {
+  const routes = routeGroups.map(group => group.routes).flat();
+  return routes.find(route => route.name === name);
 };

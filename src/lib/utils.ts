@@ -35,7 +35,7 @@ export function getInitials(name: string): string {
  * @param {Object} obj - The object to check.
  * @returns {boolean} Returns `true` if the object is empty, `false` otherwise.
  */
-export function isObjectEmpty(obj: object) {
+export function isObjectEmpty(obj: object): boolean {
   return JSON.stringify(obj) === '{}';
 }
 
