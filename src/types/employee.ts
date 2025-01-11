@@ -10,6 +10,7 @@ export type Employee = {
   avatar: string;
   campus_id: number;
   process_id: number;
+  service_id: number;
   deleted_at: string;
   created_at: string;
   updated_at: string;

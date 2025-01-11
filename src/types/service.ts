@@ -1,5 +1,11 @@
 import type { Process } from '@/types/process';
 
+export type EmployeeServicePivot = {
+  id: number;
+  employee_id: number;
+  service_id: number;
+};
+
 export type Service = {
   id: number;
   name: string;
@@ -10,6 +16,7 @@ export type Service = {
   updated_at: string;
   deleted_at: string;
   process?: Process;
+  pivot?: EmployeeServicePivot;
 };
 
 export type CreateServiceRequest = {

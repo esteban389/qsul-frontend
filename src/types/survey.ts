@@ -13,3 +13,14 @@ export type NewSurveyVersionRequest = {
   questions: NewSurveyVersionQuestionRequest[];
   keep_service_questions: boolean;
 };
+
+export type AnswerSurveyRequest = {
+  version: number;
+  respondent_type_id: number;
+  email: string;
+  employee_service_id: number;
+  answers: {
+    question_id: number;
+    answer: number;
+  }[];
+};
