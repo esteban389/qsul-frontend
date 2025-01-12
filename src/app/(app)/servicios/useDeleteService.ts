@@ -10,7 +10,7 @@ export default function useDeleteService(id: number) {
   return useMutation({
     mutationFn: () => sendRequest(id),
     onSettled: () => {
-      return queryClient.invalidateQueries({ queryKey: ['employees'] });
+      return queryClient.invalidateQueries({ queryKey: ['services'] });
     },
   });
 }

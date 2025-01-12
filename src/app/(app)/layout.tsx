@@ -10,6 +10,7 @@ import RouteBreadcrumb from '@/components/RouteBreadcrumb';
 import { useRouteByPath } from '@/lib/routes';
 import { notFound, usePathname } from 'next/navigation';
 import LoadingApplication from '@/components/LoadingApplication';
+import NotificationsDropdown from '@/components/NotificationsDropdown';
 
 function AppLayout({ children }: Readonly<{ children: ReactNode }>) {
   const { user, logout } = useAuth({ middleware: 'auth' });
@@ -26,7 +27,10 @@ function AppLayout({ children }: Readonly<{ children: ReactNode }>) {
             <SidebarTrigger className="-ml-1" />
             <RouteBreadcrumb />
           </div>
-          <UserDropdown user={user} logout={logout} />
+          <div className="flex items-center gap-4">
+            <NotificationsDropdown />
+            <UserDropdown user={user} logout={logout} />
+          </div>
         </header>
         <ScrollArea className="h-full">{children}</ScrollArea>
       </div>

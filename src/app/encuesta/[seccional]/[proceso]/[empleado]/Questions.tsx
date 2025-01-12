@@ -19,9 +19,9 @@ import {
   SURVEY_USER_TYPE_KEY,
 } from '@/app/encuesta/AskForEmailAndUserTypeModal';
 import { AxiosError } from 'axios';
+import Fireworks from 'react-canvas-confetti/dist/presets/fireworks';
 import useSubmitSurvey from './useSubmitSurvey';
 import { EMPLOYEE_SERVICE_PARAM, SERVICE_PARAM } from './ServicesList';
-import Fireworks from "react-canvas-confetti/dist/presets/fireworks";
 
 function Loading() {
   return (
@@ -33,11 +33,15 @@ function Loading() {
 
 function Completed() {
   return (
-    <div className="flex flex-col size-full items-center justify-center">
-      <span className='text-[5rem]'>🥳</span>
-      <Fireworks autorun={{ speed: 3 }} />
-      <h1 className="w-full text-center text-[3rem] font-bold">¡Gracias por completar la encuesta!</h1>
-      <p className='text-center text-xl text-primary lg:text-primary/80'>Tu opinión es muy importante para nosotros y nos ayuda a mejorar</p>
+    <div className="flex size-full flex-col items-center justify-center">
+      <span className="text-[5rem]">🥳</span>
+      <Fireworks autorun={{ speed: 1 }} />
+      <h1 className="w-full text-center text-[3rem] font-bold">
+        ¡Gracias por completar la encuesta!
+      </h1>
+      <p className="text-center text-xl text-primary lg:text-primary/80">
+        Tu opinión es muy importante para nosotros y nos ayuda a mejorar
+      </p>
     </div>
   );
 }
@@ -72,9 +76,14 @@ function Questions({
   employee: Employee;
 }) {
   const [selectedEmployeeService, setSelectedEmployeeService] =
-    useQueryState<number>(EMPLOYEE_SERVICE_PARAM, parseAsInteger.withDefault(0));
-  const [selectedService, setSelectedService] =
-    useQueryState<number>(SERVICE_PARAM, parseAsInteger.withDefault(0));
+    useQueryState<number>(
+      EMPLOYEE_SERVICE_PARAM,
+      parseAsInteger.withDefault(0),
+    );
+  const [selectedService, setSelectedService] = useQueryState<number>(
+    SERVICE_PARAM,
+    parseAsInteger.withDefault(0),
+  );
   const [surveyVersion, setSurveyVersion] = useStorage(
     'surveyVersion',
     survey.version,
@@ -91,7 +100,11 @@ function Questions({
     [],
     'sessionStorage',
   );
-  const [email, setEmail] = useStorage<string>(SURVEY_EMAIL_KEY, '', 'sessionStorage');
+  const [email, setEmail] = useStorage<string>(
+    SURVEY_EMAIL_KEY,
+    '',
+    'sessionStorage',
+  );
   const [userType, setUserType] = useStorage<string>(
     SURVEY_USER_TYPE_KEY,
     '',
@@ -146,12 +159,20 @@ function Questions({
       success: () => {
         setCurrentQuestion(0);
         setAnswers([]);
+        setEmail('');
+        setUserType('');
         return 'Respuestas enviadas correctamente';
       },
       error: error => {
         if (error instanceof AxiosError) {
           const body = error.response?.data;
           if (body && 'message' in body) {
+            if (
+              'respondent_type_id' in body?.errors ||
+              'email' in body?.errors
+            ) {
+              return 'Por favor, completa tu correo electrónico y tipo de usuario, presiona el botón en la parte superior y vuelve a intentar';
+            }
             return body.message;
           }
           return `Ocurrió un error inesperado: ${error.message}`;
@@ -246,8 +267,9 @@ function QuestionItem({
                   type="button"
                   key={value}
                   onClick={() => onAnswer(value)}
-                  className={`group relative text-[4rem] transition-transform hover:scale-105 ${currentAnswer === value ? 'scale-110 text-primary' : ''
-                    }`}>
+                  className={`group relative text-[4rem] transition-transform hover:scale-105 ${
+                    currentAnswer === value ? 'scale-110 text-primary' : ''
+                  }`}>
                   {OptionsMap[value]}
                   <span className="sr-only">{value}</span>
                   <span className="absolute inset-0 transition-all group-hover:blur-lg">
