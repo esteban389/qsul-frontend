@@ -64,6 +64,7 @@ import useCreateServiceQuestion from './useCreateServiceQuestion';
 import useDeleteServiceQuestion from './useDeleteServiceQuestion';
 import useUpdateServiceQuestion from './useUpdateServiceQuestion';
 import useCreateNewSurvey from './useCreateNewSurvey';
+import RespondentTypesManager from './respondentTypeManager';
 
 interface QuestionContentProps {
   question: Question;
@@ -580,7 +581,7 @@ function App() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}>
         <h1 className="text-2xl font-bold text-slate-800">
-          Crear una nueva versión de la encuesta
+          Administrar Encuesta
         </h1>
         <div className="flex items-center gap-4">
           {can('create', 'survey') && (
@@ -615,9 +616,10 @@ function App() {
         </div>
       </motion.div>
 
+      {can('create', 'respondent-type') && <RespondentTypesManager />}
       {can('create', 'survey') && (
         <motion.div
-          className="mb-8 rounded-lg border border-slate-200 bg-slate-50 p-4"
+          className="my-8 rounded-lg border border-slate-200 bg-slate-50 p-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}>

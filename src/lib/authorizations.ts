@@ -7,6 +7,7 @@ export type entities =
   | 'employee'
   | 'process'
   | 'service'
+  | 'respondent-type'
   | 'survey';
 
 export type operations = 'create' | 'read' | 'update' | 'delete';
@@ -40,6 +41,9 @@ const authorizations: RoleAuthorization = {
     { entity: 'survey', operation: 'read' },
     { entity: 'survey', operation: 'update' },
     { entity: 'survey', operation: 'delete' },
+    { entity: 'respondent-type', operation: 'create' },
+    { entity: 'respondent-type', operation: 'read' },
+    { entity: 'respondent-type', operation: 'update' },
   ],
   [Role.CAMPUS_COORDINATOR]: [
     { entity: 'user', operation: 'create' },
