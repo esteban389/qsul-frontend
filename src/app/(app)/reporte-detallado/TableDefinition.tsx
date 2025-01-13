@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import env from '@/lib/env';
 import { Answer } from '@/types/answer';
+import { motion } from 'framer-motion';
 
 const columns: ColumnDef<Answer>[] = [
   {
@@ -29,19 +30,25 @@ const columns: ColumnDef<Answer>[] = [
     },
     cell: ({ row }) => (
       <div className="flex flex-row items-center gap-4">
-        <Avatar>
-          <AvatarImage
-            src={
-              row.original.employee_service.employee.avatar
-                ? env('API_URL') + row.original.employee_service.employee.avatar
-                : undefined
-            }
-          />
-          <AvatarFallback>
-            {getInitials(row.original.employee_service.employee.avatar)}
-          </AvatarFallback>
-        </Avatar>
-        {row.original.employee_service.employee.name}
+        <motion.div layoutId={`avatar-${row.original.id}`}>
+          <Avatar>
+            <AvatarImage
+              src={
+                row.original.employee_service.employee.avatar
+                  ? env('API_URL') +
+                    row.original.employee_service.employee.avatar
+                  : undefined
+              }
+              className="rounded-lg object-cover"
+            />
+            <AvatarFallback>
+              {getInitials(row.original.employee_service.employee.avatar)}
+            </AvatarFallback>
+          </Avatar>
+        </motion.div>
+        <motion.span layoutId={`name-${row.original.id}`}>
+          {row.original.employee_service.employee.name}
+        </motion.span>
       </div>
     ),
   },
@@ -64,6 +71,11 @@ const columns: ColumnDef<Answer>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => (
+      <motion.div layoutId={`service-${row.original.id}`}>
+        {row.original.employee_service.service.name}
+      </motion.div>
+    ),
   },
   {
     accessorKey: 'email',
@@ -85,9 +97,11 @@ const columns: ColumnDef<Answer>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="flex flex-row items-center gap-4">
+      <motion.div
+        layoutId={`email-${row.original.id}`}
+        className="flex flex-row items-center gap-4">
         {row.original.email}
-      </div>
+      </motion.div>
     ),
   },
   {
