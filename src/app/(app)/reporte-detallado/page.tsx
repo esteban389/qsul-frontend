@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState, MouseEvent, useEffect, useMemo } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -10,6 +10,7 @@ import {
   SortingState,
   useReactTable,
   Table as TanTable,
+  Row,
 } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -29,9 +30,15 @@ import LoadingContent from '@/components/LoadingContent';
 import { Answer } from '@/types/answer';
 import useAuth from '@/hooks/useAuth';
 import { Role } from '@/types/user';
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import Link from 'next/link';
 import useAnswers from './useAnswers';
 import columns from './TableDefinition';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from '@/components/ui/dropdown-menu';
 
 function EmptyContent() {
   return (
@@ -70,21 +77,65 @@ function Loading() {
     </div>
   );
 }
+
+const AnswerRow = ({ row, index }: { row: Row<Answer>; index: number }) => {
+  const [position, setPosition] = useState<DOMRect | null>(null);
+  const [visible, setVisible] = useState(false);
+  const containerRef = useRef<HTMLTableRowElement>(null);
+
+  const handleClick = (e: MouseEvent<HTMLTableRowElement>) => {
+    setPosition(new DOMRect(e.clientX, e.clientY, 0, 0));
+    setVisible(true);
+  };
+
+  return (
+    <Popover open={visible}>
+      {position && (
+        <PopoverAnchor
+          virtualRef={{
+            current: {
+              getBoundingClientRect: () => position,
+            },
+          }}
+        />
+      )}
+      <PopoverTrigger asChild onClick={handleClick}>
+        <motion.tr
+          ref={containerRef}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 20 }}
+          transition={{ delay: index * 0.1 }}
+          className={row.getIsSelected() ? 'selected' : ''}>
+          {row.getVisibleCells().map(cell => (
+            <TableCell key={cell.id}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          ))}
+        </motion.tr>
+      </PopoverTrigger>
+      <PopoverContent
+        onInteractOutside={() => setVisible(false)}
+        onEscapeKeyDown={() => setVisible(false)}>
+        <>
+          <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0">
+            Ver observaciones
+          </div>
+          <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0">
+            Agregar observación
+          </div>
+          <Link
+            href={`/reporte-detallado/${row.original.id}`}
+            className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0">
+            Ver más detalles
+          </Link>
+        </>
+      </PopoverContent>
+    </Popover>
+  );
+};
 // Success component that handles the table
 const AnswersTable = ({ table }: { table: TanTable<Answer> }) => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  const handleClick = (e) => {
-    console.log(e)
-    // Prevent the click from propagating to avoid immediate closing
-    e.preventDefault();
-
-    // Get click coordinates relative to viewport
-    const x = e.clientX;
-    const y = e.clientY;
-
-    setPosition({ x, y });
-  };
   return (
     <>
       <ScrollArea
@@ -98,9 +149,9 @@ const AnswersTable = ({ table }: { table: TanTable<Answer> }) => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -109,32 +160,7 @@ const AnswersTable = ({ table }: { table: TanTable<Answer> }) => {
           <TableBody>
             <AnimatePresence>
               {table.getRowModel().rows.map((row, index) => (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <motion.tr
-                      onClick={handleClick}
-                      key={row.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ delay: index * 0.1 }}
-                      className={row.getIsSelected() ? 'selected' : ''}>
-                      {row.getVisibleCells().map(cell => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
-                    </motion.tr>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent style={{
-                    transform: `translate(${position.x}px, ${position.y}px)`,
-                  }}>
-                    hi
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <AnswerRow key={row.id} row={row} index={index} />
               ))}
             </AnimatePresence>
           </TableBody>
