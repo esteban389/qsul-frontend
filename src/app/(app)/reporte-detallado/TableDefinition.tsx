@@ -5,11 +5,11 @@ import { ArrowDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import env from '@/lib/env';
-import { Employee } from '@/types/employee';
+import { Answer } from '@/types/answer';
 
-const columns: ColumnDef<Employee>[] = [
+const columns: ColumnDef<Answer>[] = [
   {
-    accessorKey: 'name',
+    accessorKey: 'employee_service.employee.name',
     header: ({ column }) => {
       return (
         <Button
@@ -17,7 +17,7 @@ const columns: ColumnDef<Employee>[] = [
           onClick={() => {
             column.toggleSorting(column.getIsSorted() === 'asc');
           }}>
-          Nombre
+          Empleado
           <ArrowDown
             className={cn(
               'ml-2 size-4 transition-transform',
@@ -32,19 +32,21 @@ const columns: ColumnDef<Employee>[] = [
         <Avatar>
           <AvatarImage
             src={
-              row.original.avatar
-                ? env('API_URL') + row.original.avatar
+              row.original.employee_service.employee.avatar
+                ? env('API_URL') + row.original.employee_service.employee.avatar
                 : undefined
             }
           />
-          <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>
+          <AvatarFallback>
+            {getInitials(row.original.employee_service.employee.avatar)}
+          </AvatarFallback>
         </Avatar>
-        {row.original.name}
+        {row.original.employee_service.employee.name}
       </div>
     ),
   },
   {
-    accessorKey: 'process_id',
+    accessorKey: 'employee_service.service.name',
     header: ({ column }) => {
       return (
         <Button
@@ -52,7 +54,7 @@ const columns: ColumnDef<Employee>[] = [
           onClick={() => {
             column.toggleSorting(column.getIsSorted() === 'asc');
           }}>
-          Proceso
+          Servicio
           <ArrowDown
             className={cn(
               'ml-2 size-4 transition-transform',
@@ -62,12 +64,9 @@ const columns: ColumnDef<Employee>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => {
-      return row.original.process?.name || 'N/A';
-    },
   },
   {
-    accessorKey: 'deleted_at',
+    accessorKey: 'email',
     header: ({ column }) => {
       return (
         <Button
@@ -75,7 +74,52 @@ const columns: ColumnDef<Employee>[] = [
           onClick={() => {
             column.toggleSorting(column.getIsSorted() === 'asc');
           }}>
-          Estado
+          Correo electrónico
+          <ArrowDown
+            className={cn(
+              'ml-2 size-4 transition-transform',
+              column.getIsSorted() === 'desc' && 'rotate-180',
+            )}
+          />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="flex flex-row items-center gap-4">
+        {row.original.email}
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'respondent_type.name',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => {
+            column.toggleSorting(column.getIsSorted() === 'asc');
+          }}>
+          Tipo de encuestado
+          <ArrowDown
+            className={cn(
+              'ml-2 size-4 transition-transform',
+              column.getIsSorted() === 'desc' && 'rotate-180',
+            )}
+          />
+        </Button>
+      );
+    },
+  },
+  {
+    accessorKey: 'average',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => {
+            column.toggleSorting(column.getIsSorted() === 'asc');
+          }}>
+          Promedio
           <ArrowDown
             className={cn(
               'ml-2 size-4 transition-transform',
@@ -86,14 +130,14 @@ const columns: ColumnDef<Employee>[] = [
       );
     },
     cell: ({ row }) =>
-      row.original.deleted_at ? (
-        <Badge variant="red">Inactivo</Badge>
+      row.original.average < 3 ? (
+        <Badge variant="red">{row.original.average}</Badge>
       ) : (
-        <Badge variant="green">Activo</Badge>
+        <Badge variant="green">{row.original.average}</Badge>
       ),
   },
   {
-    accessorKey: 'updated_at',
+    accessorKey: 'survey',
     header: ({ column }) => {
       return (
         <Button
@@ -101,7 +145,7 @@ const columns: ColumnDef<Employee>[] = [
           onClick={() => {
             column.toggleSorting(column.getIsSorted() === 'asc');
           }}>
-          Fecha de última actualización
+          Versión de la encuesta
           <ArrowDown
             className={cn(
               'ml-2 size-4 transition-transform',
@@ -111,14 +155,11 @@ const columns: ColumnDef<Employee>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => {
-      if (!row.original.updated_at) return 'N/A';
-      const date = new Date(row.original.updated_at);
-      return new Intl.DateTimeFormat('es-CO', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      }).format(date);
-    },
+    cell: ({ row }) => (
+      <div className="flex w-full items-center justify-center">
+        {row.original.survey.version}
+      </div>
+    ),
   },
   {
     accessorKey: 'created_at',

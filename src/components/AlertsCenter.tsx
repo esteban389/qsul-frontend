@@ -57,7 +57,7 @@ export default function AlertsCenter() {
                   </AlertDescription>
                   <div className="mt-4 flex flex-row justify-between">
                     <Link
-                      href={`/reporte-detallado/${notification.data}`}
+                      href={`/reporte-detallado/${notification.data.answer_id}`}
                       className="group inline-flex items-center text-sm font-medium hover:underline">
                       Ver más
                       <ArrowRight className="ml-1 size-4 transition-transform group-hover:translate-x-1" />

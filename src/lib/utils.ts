@@ -64,7 +64,10 @@ export function convertBinaryUnits(
   const factor = 1024 ** (fromIndex - toIndex);
   return value * factor;
 }
-export function formatDate(date: string, options: Intl.DateTimeFormatOptions): string {
+export function formatDate(
+  date: string,
+  options: Intl.DateTimeFormatOptions,
+): string {
   return new Intl.DateTimeFormat('es-CO', options).format(new Date(date));
 }
 
@@ -73,3 +76,9 @@ export const RolesTranslations = {
   [Role.CAMPUS_COORDINATOR]: 'Coordinador seccional',
   [Role.PROCESS_LEADER]: 'Líder de proceso',
 };
+
+export function removeUndefinedAndNull<T extends object>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined && v !== null),
+  ) as T;
+}

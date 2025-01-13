@@ -95,9 +95,7 @@ const NotificationsDropdown = () => {
         <Tabs defaultValue="unread" className="w-full">
           <div className="flex items-center justify-between border-b p-4">
             <TabsList className="grid w-[200px] grid-cols-2">
-              <TabsTrigger value="unread">
-                Sin leer {unreadCount > 0 && `(${displayCount})`}
-              </TabsTrigger>
+              <TabsTrigger value="unread">Sin leer</TabsTrigger>
               <TabsTrigger value="all">Todas</TabsTrigger>
             </TabsList>
             {unreadCount > 0 && (
