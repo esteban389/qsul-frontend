@@ -15,18 +15,35 @@ import {
 import useAuth from '@/hooks/useAuth';
 import { Role } from '@/types/user';
 
+export type RoutePattern =
+  | string
+  | `${string}/[${string}]`
+  | `${string}/[${string}]/${string}`;
+
+export type BaseRoute = {
+  name: string;
+  displayName: string;
+  icon: ElementType;
+  authorizedRoles: Role[];
+};
+
+export type NavigableRoute = BaseRoute & {
+  path: RoutePattern;
+  showInSidebar: boolean;
+  children?: NestedRoute[];
+};
+
+export type NestedRoute = BaseRoute & {
+  path: RoutePattern;
+  parent: string; // Reference to parent route name
+};
+
+export type Route = NavigableRoute | NestedRoute;
+
 export type RouteGroup = {
   name: string;
   displayName: string;
-  routes: Route[];
-};
-
-export type Route = {
-  name: string;
-  path: string;
-  icon: ElementType;
-  authorizedRoles: Role[];
-  displayName: string;
+  routes: NavigableRoute[];
 };
 
 /*
@@ -48,6 +65,7 @@ const routeGroups: RouteGroup[] = [
         name: 'users',
         path: '/usuarios',
         icon: Users,
+        showInSidebar: true,
         authorizedRoles: [Role.NATIONAL_COORDINATOR, Role.CAMPUS_COORDINATOR],
       },
       {
@@ -56,12 +74,14 @@ const routeGroups: RouteGroup[] = [
         path: '/seccionales',
         icon: Building2,
         authorizedRoles: [Role.NATIONAL_COORDINATOR],
+        showInSidebar: true,
       },
       {
         displayName: 'Procesos',
         name: 'processes',
         path: '/procesos',
         icon: LayoutPanelTop,
+        showInSidebar: true,
         authorizedRoles: [Role.NATIONAL_COORDINATOR, Role.CAMPUS_COORDINATOR],
       },
       {
@@ -69,6 +89,7 @@ const routeGroups: RouteGroup[] = [
         name: 'services',
         path: '/servicios',
         icon: Package,
+        showInSidebar: true,
         authorizedRoles: [
           Role.NATIONAL_COORDINATOR,
           Role.CAMPUS_COORDINATOR,
@@ -79,6 +100,7 @@ const routeGroups: RouteGroup[] = [
         displayName: 'Empleados',
         name: 'employees',
         path: '/empleados',
+        showInSidebar: true,
         icon: BriefcaseBusiness,
         authorizedRoles: [
           Role.NATIONAL_COORDINATOR,
@@ -97,6 +119,7 @@ const routeGroups: RouteGroup[] = [
         name: 'questions',
         path: '/preguntas',
         icon: FilePenLine,
+        showInSidebar: true,
         authorizedRoles: [
           Role.NATIONAL_COORDINATOR,
           Role.CAMPUS_COORDINATOR,
@@ -107,6 +130,7 @@ const routeGroups: RouteGroup[] = [
         displayName: 'Reporte general',
         name: 'report',
         path: '/reporte',
+        showInSidebar: true,
         icon: ChartPie,
         authorizedRoles: [
           Role.NATIONAL_COORDINATOR,
@@ -118,17 +142,33 @@ const routeGroups: RouteGroup[] = [
         displayName: 'Reporte detallado',
         name: 'detailed-report',
         path: '/reporte-detallado',
+        showInSidebar: true,
         icon: NotebookTabs,
         authorizedRoles: [
           Role.NATIONAL_COORDINATOR,
           Role.CAMPUS_COORDINATOR,
           Role.PROCESS_LEADER,
         ],
+        children: [
+          {
+            displayName: 'Detalle de Reporte',
+            name: 'report-detail',
+            path: '/reporte-detallado/[id]',
+            icon: ChartPie,
+            parent: 'report',
+            authorizedRoles: [
+              Role.NATIONAL_COORDINATOR,
+              Role.CAMPUS_COORDINATOR,
+              Role.PROCESS_LEADER,
+            ],
+          },
+        ],
       },
       {
         displayName: 'Historial de cambios',
         name: 'history',
         path: '/historial-encuesta',
+        showInSidebar: true,
         icon: History,
         authorizedRoles: [
           Role.NATIONAL_COORDINATOR,
@@ -146,6 +186,7 @@ const routeGroups: RouteGroup[] = [
         displayName: 'Auditoría',
         name: 'audit',
         path: '/auditoria',
+        showInSidebar: true,
         icon: Activity,
         authorizedRoles: [Role.NATIONAL_COORDINATOR, Role.CAMPUS_COORDINATOR],
       },
@@ -160,6 +201,7 @@ const routeGroups: RouteGroup[] = [
         name: 'home',
         path: '/inicio',
         icon: Home,
+        showInSidebar: false,
         authorizedRoles: [
           Role.NATIONAL_COORDINATOR,
           Role.CAMPUS_COORDINATOR,
@@ -169,6 +211,20 @@ const routeGroups: RouteGroup[] = [
     ],
   },
 ];
+
+export const isNavigableRoute = (route: Route): route is NavigableRoute => {
+  return 'showInSidebar' in route && route.showInSidebar;
+};
+
+export const matchRoute = (pathname: string, routePath: RoutePattern): boolean => {
+  // Convert route pattern to regex
+  const pattern = routePath
+    .replace(/\[([^\]]+)\]/g, '([^/]+)') // Convert [param] to capture group
+    .replace(/\//g, '\\/'); // Escape forward slashes
+
+  const regex = new RegExp(`^${pattern}$`);
+  return regex.test(pathname);
+};
 /*
 |-----------------------------------------------------------------------------
 | Hook to get the route by its path
@@ -176,17 +232,35 @@ const routeGroups: RouteGroup[] = [
 |
 | Search in the existing routes for the one that matches the given path.
 */
-export const useRouteByPath = (name: string) => {
+export const useRouteByPath = (pathname: string) => {
   const routes = useUserRoutes();
-  let route: Route | undefined;
-  routes.forEach(group => {
-    group.routes.forEach(r => {
-      if (r.path === name) {
-        route = r;
+  let matchedRoute: Route | undefined;
+
+  // Helper function to check routes recursively
+  const findRoute = (routes: NavigableRoute[]) => {
+    for (const route of routes) {
+      if (matchRoute(pathname, route.path)) {
+        matchedRoute = route;
+        return;
       }
-    });
+      // Check children routes
+      if (route.children) {
+        for (const child of route.children) {
+          if (matchRoute(pathname, child.path)) {
+            matchedRoute = child;
+            return;
+          }
+        }
+      }
+    }
+  };
+
+  // Search through all route groups
+  routes.forEach(group => {
+    findRoute(group.routes);
   });
-  return route;
+
+  return matchedRoute;
 };
 /*
 |-----------------------------------------------------------------------------
@@ -202,14 +276,36 @@ export const useUserRoutes = (): RouteGroup[] => {
   return routeGroups
     .map(group => ({
       ...group,
-      routes: group.routes.filter(route =>
-        route.authorizedRoles.includes(user.role),
-      ),
+      routes: group.routes.filter(route => {
+        const isAuthorized = route.authorizedRoles.includes(user.role);
+        // Also check children routes
+        if (route.children) {
+          route.children = route.children.filter(child =>
+            child.authorizedRoles.includes(user.role)
+          );
+        }
+        return isAuthorized;
+      }),
     }))
     .filter(group => group.routes.length > 0);
 };
 
 export const findByName = (name: string): Route | undefined => {
-  const routes = routeGroups.map(group => group.routes).flat();
-  return routes.find(route => route.name === name);
+  const findInRoutes = (routes: NavigableRoute[]): Route | undefined => {
+    for (const route of routes) {
+      if (route.name === name) return route;
+      if (route.children) {
+        const childRoute = route.children.find(child => child.name === name);
+        if (childRoute) return childRoute;
+      }
+    }
+    return undefined;
+  };
+
+  for (const group of routeGroups) {
+    const route = findInRoutes(group.routes);
+    if (route) return route;
+  }
+
+  return undefined;
 };

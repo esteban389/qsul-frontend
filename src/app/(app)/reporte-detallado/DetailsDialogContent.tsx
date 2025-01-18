@@ -14,7 +14,15 @@ import { Role } from '@/types/user';
 import { DialogTitle, DialogDescription } from '@radix-ui/react-dialog';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Clock, User, AlertCircle, Mail, ChevronRight, BriefcaseBusiness, Package } from 'lucide-react';
+import {
+  Clock,
+  User,
+  AlertCircle,
+  Mail,
+  ChevronRight,
+  BriefcaseBusiness,
+  Package,
+} from 'lucide-react';
 import React from 'react';
 import useAuth from '@/hooks/useAuth';
 import env from '@/lib/env';
@@ -92,9 +100,7 @@ export default function DetailsDialogContent({
                 <DialogTitle asChild>
                   <div className="flex items-center gap-2">
                     <BriefcaseBusiness />
-                    <p>
-                      Nombre del empleado:{' '}
-                    </p>
+                    <p>Nombre del empleado: </p>
                     <motion.h3 layoutId={`name-${active.id}`}>
                       {active.employee_service.employee.name}
                     </motion.h3>
@@ -253,7 +259,7 @@ const fadeInUp = {
 
 const CategorySection: React.FC<{
   category: string;
-  questions: AnswerQuestion[];
+  questions: AnswerQuestions[];
 }> = ({ category, questions }) => (
   <motion.section
     {...fadeInUp}
@@ -275,7 +281,7 @@ const CategorySection: React.FC<{
 const QuestionRow: React.FC<{
   question: string;
   answer: number;
-  type: 'yesno' | 'multiple';
+  type: 'yesno' | 'radio';
 }> = ({ question, answer, type }) => (
   <div className="flex flex-row items-center justify-between gap-2 rounded-lg p-2 hover:bg-gray-50">
     <p className="flex-1 text-sm text-muted-foreground">{question}</p>

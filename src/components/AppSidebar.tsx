@@ -13,13 +13,18 @@ import {
 import { ComponentProps } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { Route, useUserRoutes } from '@/lib/routes';
+import { isNavigableRoute, Route, useUserRoutes } from '@/lib/routes';
 import { usePathname } from 'next/navigation';
 
 export default function AppSidebar({
   ...props
 }: ComponentProps<typeof Sidebar>) {
-  const routeGroups = useUserRoutes().filter(route => route.name !== 'home');
+  const routeGroups = useUserRoutes()
+    .map(group => ({
+      ...group,
+      routes: group.routes.filter(route => isNavigableRoute(route)),
+    }))
+    .filter(group => group.routes.length > 0);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -56,6 +61,10 @@ export default function AppSidebar({
 function AppSidebarItem({ route }: { route: Route }) {
   const Icon = route.icon;
   const pathname = usePathname();
+
+  const isActive =
+    pathname === route.path ||
+    route.children?.some(child => pathname.startsWith(route.path));
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
@@ -65,7 +74,7 @@ function AppSidebarItem({ route }: { route: Route }) {
         <Link
           href={route.path}
           className={
-            pathname === route.path
+            isActive
               ? 'border-2 border-primary-foreground bg-background shadow-md hover:bg-background'
               : undefined
           }>
