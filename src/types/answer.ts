@@ -1,10 +1,12 @@
 import { Employee } from './employee';
+import { Observation } from './obserations';
+import { Question } from './question';
 import { RespondentType } from './respondentType';
 import { Service } from './service';
 import { Survey } from './survey';
 
 export type Answer = {
-  id: string;
+  id: number;
   email: string;
   average: number;
   survey_id: number;
@@ -21,6 +23,19 @@ export type Answer = {
     employee: Employee;
     service: Service;
   };
+  observations?: Observation[];
+  answer_questions?: AnswerQuestions[];
+};
+
+export type AnswerQuestions = {
+  id: string;
+  answer_id: string;
+  question_id: string;
+  answer: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string;
+  question: Question;
 };
 
 export type GetAnswersRequestFilters = {

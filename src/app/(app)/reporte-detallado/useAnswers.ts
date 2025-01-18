@@ -1,6 +1,6 @@
 import { removeUndefinedAndNull } from '@/lib/utils';
 import backendClient from '@/services/backendClient';
-import { GetAnswersRequestFilters } from '@/types/answer';
+import { Answer, GetAnswersRequestFilters } from '@/types/answer';
 import { useQuery } from '@tanstack/react-query';
 
 async function GetAnswers(filters: GetAnswersRequestFilters) {
@@ -9,8 +9,9 @@ async function GetAnswers(filters: GetAnswersRequestFilters) {
   Object.entries(actualFilters).forEach(([key, value]) => {
     return searchParams.append(`filter[${key}]`, String(value));
   });
-  return (await backendClient.get('/api/answers', { params: searchParams }))
-    .data;
+  return (
+    await backendClient.get<Answer[]>('/api/answers', { params: searchParams })
+  ).data;
 }
 
 export default function useAnswers(filters: GetAnswersRequestFilters) {

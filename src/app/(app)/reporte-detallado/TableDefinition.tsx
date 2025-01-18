@@ -123,6 +123,13 @@ const columns: ColumnDef<Answer>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => (
+      <motion.div
+        layoutId={`respondent-${row.original.id}`}
+        className="flex w-full items-center justify-center">
+        {row.original.respondent_type.name}
+      </motion.div>
+    ),
   },
   {
     accessorKey: 'average',
@@ -143,12 +150,17 @@ const columns: ColumnDef<Answer>[] = [
         </Button>
       );
     },
-    cell: ({ row }) =>
-      row.original.average < 3 ? (
-        <Badge variant="red">{row.original.average}</Badge>
-      ) : (
-        <Badge variant="green">{row.original.average}</Badge>
-      ),
+    cell: ({ row }) => (
+      <motion.div
+        layoutId={`average-${row.original.id}`}
+        className="flex w-full items-center justify-center">
+        {row.original.average < 3 ? (
+          <Badge variant="red">{row.original.average}</Badge>
+        ) : (
+          <Badge variant="green">{row.original.average}</Badge>
+        )}
+      </motion.div>
+    ),
   },
   {
     accessorKey: 'survey',
@@ -170,9 +182,11 @@ const columns: ColumnDef<Answer>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="flex w-full items-center justify-center">
+      <motion.div
+        layoutId={`version-${row.original.id}`}
+        className="flex w-full items-center justify-center">
         {row.original.survey.version}
-      </div>
+      </motion.div>
     ),
   },
   {
@@ -196,10 +210,17 @@ const columns: ColumnDef<Answer>[] = [
     },
     cell: ({ row }) => {
       const date = new Date(row.original.created_at);
-      return new Intl.DateTimeFormat('es-CO', {
+      const formattedDate = new Intl.DateTimeFormat('es-CO', {
         dateStyle: 'medium',
         timeStyle: 'short',
       }).format(date);
+      return (
+        <motion.div
+          layoutId={`date-${row.original.id}`}
+          className="flex w-full items-center justify-center">
+          {formattedDate}
+        </motion.div>
+      );
     },
   },
 ];

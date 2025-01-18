@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, MouseEvent, useEffect, useMemo, useId } from 'react';
+import { useState } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -30,11 +30,11 @@ import LoadingContent from '@/components/LoadingContent';
 import { Answer } from '@/types/answer';
 import useAuth from '@/hooks/useAuth';
 import { Role } from '@/types/user';
-import env from '@/lib/env';
-import { createPortal } from 'react-dom';
+import { Dialog, DialogContent, DialogPortal } from '@radix-ui/react-dialog';
+import { DialogOverlay } from '@/components/ui/dialog';
 import useAnswers from './useAnswers';
 import columns from './TableDefinition';
-import useClickOutside from '@/hooks/use-click-outside';
+import DetailsDialogContent from './DetailsDialogContent';
 
 function EmptyContent() {
   return (
@@ -85,25 +85,11 @@ const AnswerRow = ({
   onClick: (answer: Answer) => void;
   active: Answer | null;
 }) => {
+  if (active && active.id === row.original.id) return null;
   return (
     <motion.tr
       layoutId={`row-${row.original.id}`}
       key={`row-${row.original.id}`}
-      initial={{ opacity: 0, x: -80 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{
-        // Only apply delay to the initial animation
-        delay: index * 0.1,
-        duration: 0.2,
-        type: 'spring',
-        stiffness: 300,
-        damping: 30,
-        // When layout changes (like during click animations),
-        // use these transition settings instead
-        layout: {
-          delay: 0, // No delay for layout animations
-        }
-      }}
       onClick={() => onClick(row.original)}
       className={`cursor-pointer bg-background hover:bg-muted ${row.getIsSelected() ? 'selected' : ''
         }`}>
@@ -118,127 +104,28 @@ const AnswerRow = ({
   );
 };
 
-const CloseIcon = () => {
-  return (
-    <motion.svg
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-4 text-black">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M18 6l-12 12" />
-      <path d="M6 6l12 12" />
-    </motion.svg>
-  );
-};
-
 // Success component that handles the table
 const AnswersTable = ({ table }: { table: TanTable<Answer> }) => {
   const [active, setActive] = useState<Answer | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setActive(null);
-      }
-    }
-
-    if (active) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [active]);
-  useClickOutside(ref, () => setActive(null));
+  const handleClose = () => {
+    setActive(null);
+  };
 
   return (
     <>
-      {createPortal(
-        <>
+      <Dialog open={!!active} onOpenChange={handleClose}>
+        <DialogPortal>
+          <DialogOverlay />
           <AnimatePresence>
-            {active && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-10 size-full bg-black/30"
-              />
-            )}
+            <DialogContent className="fixed inset-0 z-50 w-full max-w-lg overflow-hidden bg-muted shadow-lg sm:rounded-3xl md:left-1/2 md:top-1/2 md:grid md:h-[95vh] md:-translate-x-1/2 md:-translate-y-1/2">
+              {active && typeof active === 'object' && (
+                <DetailsDialogContent active={active} setActive={setActive} />
+              )}
+            </DialogContent>
           </AnimatePresence>
-          <AnimatePresence>
-            {active && typeof active === 'object' ? (
-              <div className="fixed inset-0 z-[100] grid place-items-center">
-                <motion.button
-                  key={`button-${active.id}`}
-                  layout
-                  initial={{
-                    opacity: 0,
-                  }}
-                  animate={{
-                    opacity: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    transition: {
-                      duration: 0.05,
-                    },
-                  }}
-                  className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-white lg:hidden"
-                  onClick={() => setActive(null)}>
-                  <CloseIcon />
-                </motion.button>
-                <motion.div
-                  layoutId={`row-${active.id}`}
-                  ref={ref}
-                  className="flex size-full max-w-[500px] flex-col overflow-hidden bg-muted sm:rounded-3xl md:h-fit md:max-h-[90%]">
-                  <ScrollArea>
-                    <motion.div layoutId={`avatar-${active.id}`}>
-                      <img
-                        width={200}
-                        height={200}
-                        src={
-                          env('API_URL') +
-                          active.employee_service.employee.avatar
-                        }
-                        alt={active.employee_service.employee.name}
-                        className="h-80 w-full object-cover object-top sm:rounded-t-lg lg:h-80"
-                      />
-                    </motion.div>
-                    <div className="flex h-screen items-start justify-between p-4">
-                      <div className="">
-                        <motion.h3
-                          layoutId={`name-${active.id}`}
-                          className="font-bold text-neutral-700">
-                          {active.employee_service.employee.name}
-                        </motion.h3>
-                        <motion.p
-                          layoutId={`service-${active.id}`}
-                          className="text-neutral-600">
-                          {active.employee_service.service.name}
-                        </motion.p>
-                      </div>
-                    </div>
-                  </ScrollArea>
-                </motion.div>
-              </div>
-            ) : null}
-          </AnimatePresence>
-        </>,
-        document.body,
-      )}
+        </DialogPortal>
+      </Dialog>
       <ScrollArea
         className={cn('w-full rounded-md border-2 border-secondary shadow-md')}>
         <Table>
@@ -259,17 +146,15 @@ const AnswersTable = ({ table }: { table: TanTable<Answer> }) => {
             ))}
           </TableHeader>
           <TableBody>
-            <AnimatePresence>
-              {table.getRowModel().rows.map((row, index) => (
-                <AnswerRow
-                  key={row.id}
-                  row={row}
-                  index={index}
-                  onClick={setActive}
-                  active={active}
-                />
-              ))}
-            </AnimatePresence>
+            {table.getRowModel().rows.map((row, index) => (
+              <AnswerRow
+                key={row.id}
+                row={row}
+                index={index}
+                onClick={setActive}
+                active={active}
+              />
+            ))}
           </TableBody>
         </Table>
       </ScrollArea>

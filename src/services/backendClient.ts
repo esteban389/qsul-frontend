@@ -10,6 +10,9 @@ const backendClient = axios.create({
     Accept: 'application/json',
     'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
+    next: {
+      revalidate: 60 * 60 * 24,
+    },
   },
 });
 export default backendClient;
