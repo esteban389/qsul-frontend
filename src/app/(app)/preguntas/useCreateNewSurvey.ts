@@ -1,15 +1,16 @@
-import backendClient from "@/services/backendClient";
-import { NewSurveyVersionRequest } from "@/types/survey";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import backendClient from '@/services/backendClient';
+import { NewSurveyVersionRequest } from '@/types/survey';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 function CreateNewVersion(request: NewSurveyVersionRequest) {
-  return backendClient.post("/api/survey", request);
+  return backendClient.post('/api/survey', request);
 }
 
 export default function useCreateNewSurvey() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ request }: { request: NewSurveyVersionRequest }) => CreateNewVersion(request),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["surveys"] }),
-  })
-};
+    mutationFn: ({ request }: { request: NewSurveyVersionRequest }) =>
+      CreateNewVersion(request),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['surveys'] }),
+  });
+}

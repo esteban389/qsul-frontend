@@ -190,6 +190,35 @@ const columns: ColumnDef<Answer>[] = [
     ),
   },
   {
+    accessorKey: 'deleted_at',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => {
+            column.toggleSorting(column.getIsSorted() === 'asc');
+          }}>
+          Incluido en reporte general
+          <ArrowDown
+            className={cn(
+              'ml-2 size-4 transition-transform',
+              column.getIsSorted() === 'desc' && 'rotate-180',
+            )}
+          />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      return (
+        <motion.div
+          layoutId={`deleted-${row.original.id}`}
+          className="flex w-full items-center justify-center">
+          {row.original.deleted_at ? 'No' : 'Sí'}
+        </motion.div>
+      );
+    },
+  },
+  {
     accessorKey: 'created_at',
     header: ({ column }) => {
       return (

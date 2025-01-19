@@ -27,12 +27,12 @@ import {
 import { RespondentType } from '@/types/respondentType';
 import QueryRenderer from '@/components/QueryRenderer';
 import { Skeleton } from '@/components/ui/skeleton';
-import useRespondentType from './useRespondentType';
 import { safeParse } from 'valibot';
 import { EmailSchema, RespondentTypeSchema } from '@/Schemas/SurveySchema';
 import { Label } from '@/components/ui/label';
 import ErrorText from '@/components/ui/ErrorText';
 import { ValidationErrors } from '@/types/ValidationResult';
+import useRespondentType from './useRespondentType';
 
 export const SURVEY_EMAIL_KEY = 'survey-email';
 export const SURVEY_USER_TYPE_KEY = 'survey-user-type';
@@ -134,7 +134,11 @@ export default function AskForEmailAndUserTypeModal() {
             error: Error,
             success: SelectRespondentType,
           }}
-          successProps={{ value: userType, setValue: setUserType, error: errors.type }}
+          successProps={{
+            value: userType,
+            setValue: setUserType,
+            error: errors.type,
+          }}
         />
         <Button onClick={handleSave}>Continuar</Button>
       </DialogContent>
@@ -243,7 +247,7 @@ const RippleButton = React.forwardRef<
       {ripples.map(ripple => (
         <span
           key={ripple.id}
-          className="animate-ripple absolute block rounded-full bg-white/30"
+          className="absolute block animate-ripple rounded-full bg-white/30"
           style={{
             left: ripple.left,
             top: ripple.top,

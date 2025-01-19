@@ -63,7 +63,10 @@ export default function DetailsDialogContent({
   const { user } = useAuth({ middleware: 'auth' });
   const detailsQuery = useAnswerDetails(active.id);
   return (
-    <motion.div layoutId={`row-${active.id}`} className="grid overflow-hidden">
+    <motion.div
+      layout
+      layoutId={`row-${active.id}`}
+      className="grid overflow-hidden">
       <motion.button
         key={`button-${active.id}`}
         layout
@@ -219,7 +222,7 @@ type GroupedQuestions = {
   [key in 'Sí/No' | 'Selección Múltiple']?: AnswerQuestions[];
 };
 
-function AnswerQuestionsList({ data }: { data: Required<Answer> }) {
+export function AnswerQuestionsList({ data }: { data: Required<Answer> }) {
   const groupedQuestions = data.answer_questions.reduce<GroupedQuestions>(
     (acc, aq) => {
       const category =

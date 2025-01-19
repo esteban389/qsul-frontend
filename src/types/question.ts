@@ -24,7 +24,7 @@ export type UpdateServiceQuestionRequest = {
   type?: 'yesno' | 'radio';
   order?: number;
   question_id: number;
-}
+};
 
 export type NewSurveyVersionQuestionRequest = {
   text: string;

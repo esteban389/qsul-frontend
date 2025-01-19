@@ -419,70 +419,64 @@ function Services({
           ))}
         </ul>
       )}
-      {can('update', 'employee') && (
-        <>
-          {addingService ? (
-            <div className="mt-4 flex h-fit w-full flex-col md:flex-row">
-              {isPending && <Skeleton className="h-4 w-24" />}
-              {isSuccess && allServices && (
-                <>
-                  <Select
-                    onValueChange={value => setSelectedService(Number(value))}>
-                    <SelectTrigger className="h-fit max-w-[60%]">
-                      <SelectValue placeholder="Seleccionar servicio" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      <SelectGroup>
-                        {allServices.map(service => (
-                          <SelectItem
-                            key={service.id}
-                            value={String(service.id)}>
-                            <div className="flex flex-row items-center gap-4 truncate">
-                              <Avatar>
-                                <AvatarImage
-                                  src={
-                                    service.icon
-                                      ? env('API_URL') + service.icon
-                                      : undefined
-                                  }
-                                />
-                                <AvatarFallback>
-                                  {getInitials(service.name)}
-                                </AvatarFallback>
-                              </Avatar>
-                              {service.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <div className="mt-4 flex w-full flex-row items-center justify-center gap-2 md:mt-0">
-                    <Button
-                      variant="default"
-                      className="bg-emerald-600 hover:bg-emerald-800"
-                      onClick={() => onAddService()}>
-                      <Check />
-                    </Button>
-                    <Button
-                      variant="default"
-                      className="bg-red-600 hover:bg-red-800"
-                      onClick={() => setAddingService(false)}>
-                      <X />
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
-          ) : (
-            <Button
-              variant="ghost"
-              className="mt-4 w-full"
-              onClick={() => setAddingService(true)}>
-              <CirclePlus /> Agregar servicio
-            </Button>
+      {can('update', 'employee') && addingService ? (
+        <div className="mt-4 flex h-fit w-full flex-col md:flex-row">
+          {isPending && <Skeleton className="h-4 w-24" />}
+          {isSuccess && allServices && (
+            <>
+              <Select
+                onValueChange={value => setSelectedService(Number(value))}>
+                <SelectTrigger className="h-fit max-w-[60%]">
+                  <SelectValue placeholder="Seleccionar servicio" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  <SelectGroup>
+                    {allServices.map(service => (
+                      <SelectItem key={service.id} value={String(service.id)}>
+                        <div className="flex flex-row items-center gap-4 truncate">
+                          <Avatar>
+                            <AvatarImage
+                              src={
+                                service.icon
+                                  ? env('API_URL') + service.icon
+                                  : undefined
+                              }
+                            />
+                            <AvatarFallback>
+                              {getInitials(service.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          {service.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <div className="mt-4 flex w-full flex-row items-center justify-center gap-2 md:mt-0">
+                <Button
+                  variant="default"
+                  className="bg-emerald-600 hover:bg-emerald-800"
+                  onClick={() => onAddService()}>
+                  <Check />
+                </Button>
+                <Button
+                  variant="default"
+                  className="bg-red-600 hover:bg-red-800"
+                  onClick={() => setAddingService(false)}>
+                  <X />
+                </Button>
+              </div>
+            </>
           )}
-        </>
+        </div>
+      ) : (
+        <Button
+          variant="ghost"
+          className="mt-4 w-full"
+          onClick={() => setAddingService(true)}>
+          <CirclePlus /> Agregar servicio
+        </Button>
       )}
     </div>
   );
@@ -511,19 +505,15 @@ function ServiceItem({
         </Avatar>
         {service.name}
       </div>
-      {can('delete', 'employee') && (
-        <>
-          {removeServiceMutation.isPending ? (
-            <LoaderCircle className="animate-spin" />
-          ) : (
-            <Button
-              onClick={() => removeServiceMutation.mutate()}
-              variant="outline"
-              className="border-0 p-0 text-red-500 transition-transform hover:scale-125 hover:bg-transparent hover:text-red-500">
-              <CircleX />
-            </Button>
-          )}
-        </>
+      {can('delete', 'employee') && removeServiceMutation.isPending ? (
+        <LoaderCircle className="animate-spin" />
+      ) : (
+        <Button
+          onClick={() => removeServiceMutation.mutate()}
+          variant="outline"
+          className="border-0 p-0 text-red-500 transition-transform hover:scale-125 hover:bg-transparent hover:text-red-500">
+          <CircleX />
+        </Button>
       )}
     </li>
   );

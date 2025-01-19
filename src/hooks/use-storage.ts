@@ -7,6 +7,7 @@ const getItem = (key: string, storageType: StorageType) => {
     const item = window[storageType].getItem(key);
     return item ? JSON.parse(item, receiver) : null;
   }
+  return undefined;
 };
 
 const setItem = <T>(key: string, value: T, storageType: StorageType) => {
@@ -40,6 +41,7 @@ const useStorage = <T>(
     return () => {
       window.removeEventListener('storage', storageListener);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setValue = (value: T | ((val: T) => T)) => {
@@ -50,8 +52,8 @@ const useStorage = <T>(
           : value;
       setStoredValue(valueToStore);
       setItem(key, valueToStore, storageType);
-    } catch (error) {
-      console.error(error);
+    } catch {
+      /* empty */
     }
   };
 
@@ -61,8 +63,8 @@ const useStorage = <T>(
       if (item !== null) {
         setStoredValue(item as T);
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
+      /* empty */
     }
   }, [key, storageType]);
 
@@ -70,8 +72,8 @@ const useStorage = <T>(
     try {
       window[storageType].removeItem(key);
       setStoredValue(initialValue);
-    } catch (error) {
-      console.error(error);
+    } catch {
+      /* empty */
     }
   };
 

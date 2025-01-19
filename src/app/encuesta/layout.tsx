@@ -16,7 +16,7 @@ export default function layout({
       <main className="mx-4 h-3/4 w-full max-w-3xl rounded-md bg-background/70 p-4">
         {children}
       </main>
-      <div className='fixed left-4 top-4 flex items-center justify-center'>
+      <div className="fixed left-4 top-4 flex items-center justify-center">
         <AskForEmailAndUserTypeModal />
       </div>
     </div>

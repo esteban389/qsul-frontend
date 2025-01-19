@@ -13,8 +13,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import type { Service } from '@/types/service';
 import { Dispatch, SetStateAction } from 'react';
-import useServices from './useServices';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import useServices from './useServices';
 
 export default function ServiceSelect({
   service = null,
@@ -52,7 +52,7 @@ function Success({
       onValueChange={(value: string) =>
         setService(services.find(s => s.id === Number(value)) || null)
       }>
-      <SelectTrigger className="bg-background h-fit max-w-[60%] md:w-fit">
+      <SelectTrigger className="h-fit max-w-[60%] bg-background md:w-fit">
         <SelectValue placeholder="Seleccionar servicio" />
       </SelectTrigger>
       <SelectContent className="max-h-60">
@@ -67,7 +67,9 @@ function Success({
               <div className="flex flex-row items-center gap-4 truncate">
                 <Avatar>
                   <AvatarImage
-                    src={service.icon ? env('API_URL') + service.icon : undefined}
+                    src={
+                      service.icon ? env('API_URL') + service.icon : undefined
+                    }
                   />
                   <AvatarFallback>{getInitials(service.name)}</AvatarFallback>
                 </Avatar>

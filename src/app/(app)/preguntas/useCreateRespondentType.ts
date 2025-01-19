@@ -1,8 +1,8 @@
-import backendClient from "@/services/backendClient";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import backendClient from '@/services/backendClient';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 function CreateRespondentType(name: string) {
-  return backendClient.post("/api/respondent-types", { name });
+  return backendClient.post('/api/respondent-types', { name });
 }
 
 export default function useCreateRespondentType(name: string) {
@@ -10,7 +10,7 @@ export default function useCreateRespondentType(name: string) {
   return useMutation({
     mutationFn: () => CreateRespondentType(name),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["respondent-types"] });
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ['respondent-types'] });
+    },
+  });
 }

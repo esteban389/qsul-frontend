@@ -68,13 +68,7 @@ interface Answer {
   answer: number;
 }
 
-function Questions({
-  data: survey,
-  employee,
-}: {
-  data: Survey;
-  employee: Employee;
-}) {
+function Questions({ data: survey }: { data: Survey }) {
   const [selectedEmployeeService, setSelectedEmployeeService] =
     useQueryState<number>(
       EMPLOYEE_SERVICE_PARAM,
@@ -168,8 +162,8 @@ function Questions({
           const body = error.response?.data;
           if (body && 'message' in body) {
             if (
-              'respondent_type_id' in body?.errors ||
-              'email' in body?.errors
+              'respondent_type_id' in (body?.errors ?? {}) ||
+              'email' in (body?.errors ?? {})
             ) {
               return 'Por favor, completa tu correo electrónico y tipo de usuario, presiona el botón en la parte superior y vuelve a intentar';
             }

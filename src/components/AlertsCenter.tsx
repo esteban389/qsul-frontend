@@ -57,7 +57,7 @@ export default function AlertsCenter() {
                   </AlertDescription>
                   <div className="mt-4 flex flex-row justify-between">
                     <Link
-                      href={`/reporte-detallado?active=${notification.data.answer_id}`}
+                      href={`/reporte-detallado/${notification.data.answer_id}`}
                       className="group inline-flex items-center text-sm font-medium hover:underline">
                       Ver más
                       <ArrowRight className="ml-1 size-4 transition-transform group-hover:translate-x-1" />
@@ -73,10 +73,11 @@ export default function AlertsCenter() {
               </div>
               {/* Add a colored border on the left side based on type */}
               <div
-                className={`absolute inset-y-0 left-0 w-1 ${notification.data.type === 'danger'
-                  ? 'bg-red-600'
-                  : 'bg-green-600'
-                  }`}
+                className={`absolute inset-y-0 left-0 w-1 ${
+                  notification.data.type === 'danger'
+                    ? 'bg-red-600'
+                    : 'bg-green-600'
+                }`}
               />
             </Alert>
           </motion.div>

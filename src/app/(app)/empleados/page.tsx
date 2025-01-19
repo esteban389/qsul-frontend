@@ -115,9 +115,9 @@ const EmployeesTable = ({ table }: { table: TanTable<Employee> }) => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -126,9 +126,7 @@ const EmployeesTable = ({ table }: { table: TanTable<Employee> }) => {
           <TableBody>
             <AnimatePresence>
               {table.getRowModel().rows.map((row, index) => (
-                <EmployeeDetailsSheet
-                  key={row.id}
-                  employee={row.original}>
+                <EmployeeDetailsSheet key={row.id} employee={row.original}>
                   <motion.tr
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -149,7 +147,7 @@ const EmployeesTable = ({ table }: { table: TanTable<Employee> }) => {
             </AnimatePresence>
           </TableBody>
         </Table>
-      </ScrollArea >
+      </ScrollArea>
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"

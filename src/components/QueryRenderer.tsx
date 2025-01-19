@@ -8,8 +8,8 @@ type QueryRendererProps<TData, TError, TSuccessProps extends object> = {
     pending: React.ComponentType;
     success: React.ComponentType<{ data?: TData } & TSuccessProps>;
     error:
-    | React.ComponentType<{ error: TError; retry: () => void }>
-    | ((error: TError, retry: () => void) => React.ReactNode);
+      | React.ComponentType<{ error: TError; retry: () => void }>
+      | ((error: TError, retry: () => void) => React.ReactNode);
 
     // Optional components
     loading?: React.ComponentType;

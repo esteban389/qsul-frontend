@@ -65,6 +65,7 @@ import useDeleteServiceQuestion from './useDeleteServiceQuestion';
 import useUpdateServiceQuestion from './useUpdateServiceQuestion';
 import useCreateNewSurvey from './useCreateNewSurvey';
 import RespondentTypesManager from './respondentTypeManager';
+import useIsModified from '@/hooks/use-is-modified';
 
 interface QuestionContentProps {
   question: Question;
@@ -116,7 +117,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
     if (onDelete) {
       onDelete(id);
     }
-  }
+  };
 
   return (
     <div className="flex items-start gap-4">
@@ -252,7 +253,6 @@ const SortableQuestionItem: React.FC<SortableQuestionItemProps> = ({
     id: question.id,
   });
 
-
   const can = useAuthorize();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -326,18 +326,21 @@ function Empty() {
 }
 
 function Success({
+  data,
   questions,
   setQuestions,
 }: {
+  data: { questions: Question[] };
   questions: Question[];
   setQuestions: React.Dispatch<React.SetStateAction<Question[]>>;
 }) {
+  const isModified = useIsModified(questions, data.questions);
   const [activeId, setActiveId] = useState<number | null>(null);
   const deleteServiceQuestionMutation = useDeleteServiceQuestion();
   const [questionsService, setQuestionsService] = useState<Service | null>(
     null,
   );
-  const updateServiceQuestionMutation = useUpdateServiceQuestion()
+  const updateServiceQuestionMutation = useUpdateServiceQuestion();
   const can = useAuthorize();
   const isMobile = useIsMobile();
   const sensors = useSensors(
@@ -372,11 +375,17 @@ function Success({
     const oldIndex = questions.findIndex(q => q.id === active.id);
     const newIndex = questions.findIndex(q => q.id === over.id);
     if (activeQuestion?.service_id && oldIndex !== newIndex) {
-      toast.promise(updateServiceQuestionMutation.mutateAsync({ order: newIndex, question_id: activeQuestion.id }), {
-        loading: 'Actualizando pregunta...',
-        success: 'Pregunta actualizada exitosamente',
-        error: 'Error al actualizar la pregunta',
-      });
+      toast.promise(
+        updateServiceQuestionMutation.mutateAsync({
+          order: newIndex,
+          question_id: activeQuestion.id,
+        }),
+        {
+          loading: 'Actualizando pregunta...',
+          success: 'Pregunta actualizada exitosamente',
+          error: 'Error al actualizar la pregunta',
+        },
+      );
     }
 
     setQuestions(arrayMove(questions, oldIndex, newIndex));
@@ -386,15 +395,18 @@ function Success({
       questions.map(q => (q.id === updatedQuestion.id ? updatedQuestion : q)),
     );
     if (updatedQuestion.service_id) {
-      toast.promise(updateServiceQuestionMutation.mutateAsync({
-        question_id: updatedQuestion.id,
-        text: updatedQuestion.text,
-        type: updatedQuestion.type,
-      }), {
-        loading: 'Actualizando pregunta...',
-        success: 'Pregunta actualizada exitosamente',
-        error: 'Error al actualizar la pregunta',
-      });
+      toast.promise(
+        updateServiceQuestionMutation.mutateAsync({
+          question_id: updatedQuestion.id,
+          text: updatedQuestion.text,
+          type: updatedQuestion.type,
+        }),
+        {
+          loading: 'Actualizando pregunta...',
+          success: 'Pregunta actualizada exitosamente',
+          error: 'Error al actualizar la pregunta',
+        },
+      );
     }
   };
 
@@ -556,11 +568,13 @@ function App() {
 
   const handleCreateNewSurvey = (keep_service_questions: boolean) => {
     const survey = {
-      questions: questions.filter(q => !q.service_id).map((q, index) => ({
-        text: q.text,
-        type: q.type,
-        order: index + 1,
-      })),
+      questions: questions
+        .filter(q => !q.service_id)
+        .map((q, index) => ({
+          text: q.text,
+          type: q.type,
+          order: index + 1,
+        })),
       keep_service_questions,
     };
     toast.promise(createNewSurveyMutation.mutateAsync({ request: survey }), {
@@ -604,10 +618,16 @@ function App() {
                 </div>
                 <div className="flex justify-end gap-2">
                   <DialogClose asChild>
-                    <Button variant="outline" onClick={() => handleCreateNewSurvey(false)}>No</Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleCreateNewSurvey(false)}>
+                      No
+                    </Button>
                   </DialogClose>
                   <DialogClose asChild>
-                    <Button onClick={() => handleCreateNewSurvey(true)}>Sí</Button>
+                    <Button onClick={() => handleCreateNewSurvey(true)}>
+                      Sí
+                    </Button>
                   </DialogClose>
                 </div>
               </DialogContent>

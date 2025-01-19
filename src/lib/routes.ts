@@ -216,7 +216,10 @@ export const isNavigableRoute = (route: Route): route is NavigableRoute => {
   return 'showInSidebar' in route && route.showInSidebar;
 };
 
-export const matchRoute = (pathname: string, routePath: RoutePattern): boolean => {
+export const matchRoute = (
+  pathname: string,
+  routePath: RoutePattern,
+): boolean => {
   // Convert route pattern to regex
   const pattern = routePath
     .replace(/\[([^\]]+)\]/g, '([^/]+)') // Convert [param] to capture group
@@ -281,7 +284,7 @@ export const useUserRoutes = (): RouteGroup[] => {
         // Also check children routes
         if (route.children) {
           route.children = route.children.filter(child =>
-            child.authorizedRoles.includes(user.role)
+            child.authorizedRoles.includes(user.role),
           );
         }
         return isAuthorized;

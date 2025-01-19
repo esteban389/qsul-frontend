@@ -5,9 +5,9 @@ import { cn } from '@/lib/utils';
 import { Employee } from '@/types/employee';
 import { ChevronLeft } from 'lucide-react';
 import { useQueryState, parseAsInteger } from 'nuqs';
+import Link from 'next/link';
 import ServicesList, { EMPLOYEE_SERVICE_PARAM } from './ServicesList';
 import Questions from './Questions';
-import Link from 'next/link';
 
 type params = { seccional: string; proceso: string; empleado: string };
 

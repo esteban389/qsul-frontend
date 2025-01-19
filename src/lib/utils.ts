@@ -66,7 +66,11 @@ export function convertBinaryUnits(
 }
 export function formatDate(
   date: string,
-  options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' },
+  options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  },
 ): string {
   return new Intl.DateTimeFormat('es-CO', options).format(new Date(date));
 }

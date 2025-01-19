@@ -76,12 +76,10 @@ function Loading() {
 
 const AnswerRow = ({
   row,
-  index,
   onClick,
   active,
 }: {
   row: Row<Answer>;
-  index: number;
   onClick: (answer: Answer) => void;
   active: Answer | null;
 }) => {
@@ -91,8 +89,9 @@ const AnswerRow = ({
       layoutId={`row-${row.original.id}`}
       key={`row-${row.original.id}`}
       onClick={() => onClick(row.original)}
-      className={`cursor-pointer bg-background hover:bg-muted ${row.getIsSelected() ? 'selected' : ''
-        }`}>
+      className={`cursor-pointer bg-background hover:bg-muted ${
+        row.getIsSelected() ? 'selected' : ''
+      }`}>
       {row.getVisibleCells().map(cell => (
         <TableCell key={cell.id}>
           <motion.div>
@@ -137,20 +136,19 @@ const AnswersTable = ({ table }: { table: TanTable<Answer> }) => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.map((row, index) => (
+            {table.getRowModel().rows.map(row => (
               <AnswerRow
                 key={row.id}
                 row={row}
-                index={index}
                 onClick={setActive}
                 active={active}
               />
@@ -224,7 +222,7 @@ function AnswersPage() {
             preferCacheOverFetch: false,
             pending: Loading,
             success: AnswersTable,
-            error: ({ error, retry }) => (
+            error: ({ retry }) => (
               <motion.div
                 className="text-center"
                 initial={{ opacity: 0 }}

@@ -64,7 +64,8 @@ function AppSidebarItem({ route }: { route: Route }) {
 
   const isActive =
     pathname === route.path ||
-    route.children?.some(child => pathname.startsWith(route.path));
+    ('children' in route &&
+      route.children?.some(() => pathname.startsWith(route.path)));
   return (
     <SidebarMenuItem>
       <SidebarMenuButton

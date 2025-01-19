@@ -7,13 +7,12 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
-import { Route, useRouteByPath, useUserRoutes } from '@/lib/routes';
+import { Route, useUserRoutes } from '@/lib/routes';
 
 type BreadcrumbSegment = {
   path: string;
   displayName: string;
 };
-
 
 function findMatchingRoute(
   path: string,
@@ -60,7 +59,7 @@ function getBreadcrumbSegments(
 
   let accumulatedPath = '';
   for (const segment of pathSegments) {
-    accumulatedPath += '/' + segment;
+    accumulatedPath += `/${segment}`;
 
     const route = findMatchingRoute(accumulatedPath, routeGroups);
 
