@@ -23,6 +23,7 @@ import useReadAllNotifications from '@/app/(app)/useReadAllNotifications';
 import { NotificationType, Notification } from '@/types/notification';
 import useReadNotification from '@/app/(app)/useReadNotification';
 import { formatDate } from '@/lib/utils';
+import { twMerge } from 'tailwind-merge';
 
 const NotificationsDropdown = () => {
   const [open, setOpen] = useState(false);
@@ -72,7 +73,10 @@ const NotificationsDropdown = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="relative rounded-full p-2">
+          className={twMerge(
+            'relative rounded-full p-2 transition-transform',
+            unreadCount > 0 && 'animateNotificationsBell',
+          )}>
           <Bell className="size-5" />
           {unreadCount > 0 && (
             <motion.div
