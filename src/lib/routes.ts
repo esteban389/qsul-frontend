@@ -188,7 +188,7 @@ const routeGroups: RouteGroup[] = [
         path: '/auditoria',
         showInSidebar: true,
         icon: Activity,
-        authorizedRoles: [Role.NATIONAL_COORDINATOR, Role.CAMPUS_COORDINATOR],
+        authorizedRoles: [Role.NATIONAL_COORDINATOR],
       },
     ],
   },
