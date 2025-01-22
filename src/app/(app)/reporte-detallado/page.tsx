@@ -60,7 +60,7 @@ function EmptyContent() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}>
-        Upps, parece que no hay empleados
+        Upps, parece que no hay nada por reportar
       </motion.p>
     </motion.div>
   );

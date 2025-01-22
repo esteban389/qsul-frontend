@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import {
+  flexRender,
   ColumnFiltersState,
   getCoreRowModel,
   getFilteredRowModel,
@@ -14,19 +15,29 @@ import {
 import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import QueryRenderer from '@/components/QueryRenderer';
 import LoadingContent from '@/components/LoadingContent';
 import { Audit } from '@/types/audit';
-import columns from './TableDefinition';
-import useAudit from './useAudit';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableRow,
+  TableHead,
+} from '@/components/ui/table';
+import { cn } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import useAudit from './useAudit';
+import columns from './TableDefinition';
+import AuditRow from './AuditRow';
 
 function Loading() {
   return (
@@ -54,6 +65,7 @@ export default function Page() {
     },
     columns,
   });
+  console.log(table.getColumn('event')?.getFilterValue());
 
   return (
     <motion.main
@@ -90,35 +102,24 @@ export default function Page() {
           />
           <Search className="pointer-events-none absolute inset-y-0 right-0 mr-2 h-full text-muted-foreground" />
         </motion.div>
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button>Evento</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem
-              onClick={() => table.getColumn('event')?.setFilterValue('')}>
-              Sin filtro
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() =>
-                table.getColumn('event')?.setFilterValue('created')
-              }>
-              Creación
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() =>
-                table.getColumn('event')?.setFilterValue('deleted')
-              }>
-              Eliminación
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() =>
-                table.getColumn('event')?.setFilterValue('updated')
-              }>
-              Actualización
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Select
+          key={table.getColumn('event')?.getFilterValue() as string}
+          value={table.getColumn('event')?.getFilterValue() as string}
+          onValueChange={value =>
+            table.getColumn('event')?.setFilterValue(value)
+          }>
+          <SelectTrigger>
+            <SelectValue placeholder="Evento" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="created">Creación</SelectItem>
+            <SelectItem value="deleted">Eliminación</SelectItem>
+            <SelectItem value="updated">Actualización</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button onClick={() => table.resetColumnFilters()}>
+          Quitar filtros
+        </Button>
       </motion.div>
       <QueryRenderer
         query={auditsQuery}
@@ -147,25 +148,50 @@ export default function Page() {
 }
 
 function ContentTable({ table }: { table: TanTable<Audit> }) {
-  return <>
-    <ScrollArea>
-
-    </ScrollArea>
-    <div className="flex items-center justify-end space-x-2 py-4">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => table.previousPage()}
-        disabled={!table.getCanPreviousPage()}>
-        Anterior
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => table.nextPage()}
-        disabled={!table.getCanNextPage()}>
-        Siguiente
-      </Button>
-    </div>
-  </>;
+  return (
+    <>
+      <ScrollArea
+        className={cn('w-full rounded-md border-2 border-secondary shadow-md')}>
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map(row => (
+              <AuditRow key={row.id} row={row} />
+            ))}
+          </TableBody>
+        </Table>
+      </ScrollArea>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}>
+          Anterior
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}>
+          Siguiente
+        </Button>
+      </div>
+    </>
+  );
 }

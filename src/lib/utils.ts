@@ -97,10 +97,10 @@ export const jsonToBase64Image = (
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
       : { r: 0, g: 0, b: 0 };
   };
 
@@ -124,21 +124,22 @@ export const jsonToBase64Image = (
         <rect width="100%" height="100%" fill="${backgroundColor}"/>
         <text x="20" y="40" font-family="monospace" font-size="14">
           ${lines
-        .map(
-          (line, i) => `
+            .map(
+              (line, i) => `
             <tspan
               x="20"
               dy="${i === 0 ? 0 : '1.2em'}"
-              fill="${line.includes('"')
-              ? primaryColor
-              : line.includes(':')
-                ? '#24292e'
-                : line.match(/true|false|null/)
-                  ? '#005cc5'
-                  : line.match(/\d+/)
-                    ? '#032f62'
-                    : '#24292e'
-            }"
+              fill="${
+                line.includes('"')
+                  ? primaryColor
+                  : line.includes(':')
+                    ? '#24292e'
+                    : line.match(/true|false|null/)
+                      ? '#005cc5'
+                      : line.match(/\d+/)
+                        ? '#032f62'
+                        : '#24292e'
+              }"
             >${line
               .replace(/&/g, '&amp;')
               .replace(/</g, '&lt;')
@@ -146,8 +147,8 @@ export const jsonToBase64Image = (
               .replace(/"/g, '&quot;')
               .replace(/'/g, '&apos;')}</tspan>
           `,
-        )
-        .join('')}
+            )
+            .join('')}
         </text>
       </svg>
     `.trim();
@@ -155,6 +156,95 @@ export const jsonToBase64Image = (
 
   try {
     const svg = createSvg(jsonString);
+    const base64 = btoa(svg);
+    return `data:image/svg+xml;base64,${base64}`;
+  } catch (e) {
+    return '';
+  }
+};
+
+const createSvg = (
+  json: string,
+  title: string = '',
+  primaryColor = '#22863a',
+): string => {
+  const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : { r: 0, g: 0, b: 0 };
+  };
+  const getLighterColor = (hex: string): string => {
+    const { r, g, b } = hexToRgb(hex);
+    // Mix with white to create lighter shade (90% white, 10% base color)
+    const lighterR = Math.round(r * 0.1 + 255 * 0.9);
+    const lighterG = Math.round(g * 0.1 + 255 * 0.9);
+    const lighterB = Math.round(b * 0.1 + 255 * 0.9);
+    return `rgb(${lighterR}, ${lighterG}, ${lighterB})`;
+  };
+  const lines = JSON.stringify(JSON.parse(json), null, 2).split('\n');
+  // Increase height to accommodate title
+  const height = Math.max(lines.length * 24 + 80, 140); // Added extra space for title
+  const backgroundColor = getLighterColor(primaryColor);
+
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 ${height}">
+      <rect width="100%" height="100%" fill="${backgroundColor}"/>
+      
+      <!-- Title -->
+      <text 
+        x="20" 
+        y="30" 
+        font-family="system-ui, -apple-system, sans-serif" 
+        font-size="16" 
+        font-weight="bold" 
+        fill="#24292e"
+      >${title}</text>
+
+      <!-- JSON Content -->
+      <text x="20" y="60" font-family="monospace" font-size="14">
+        ${lines
+          .map(
+            (line, i) => `
+          <tspan
+            x="20"
+            dy="${i === 0 ? 0 : '1.2em'}"
+            fill="${
+              line.includes('"')
+                ? primaryColor
+                : line.includes(':')
+                  ? '#24292e'
+                  : line.match(/true|false|null/)
+                    ? '#005cc5'
+                    : line.match(/\d+/)
+                      ? '#032f62'
+                      : '#24292e'
+            }"
+          >${line
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&apos;')}</tspan>
+        `,
+          )
+          .join('')}
+      </text>
+    </svg>
+  `.trim();
+};
+
+export const jsonToSvgDataUrl = (
+  jsonString: string,
+  title: string = '',
+  color?: string,
+): string => {
+  try {
+    const svg = createSvg(jsonString, title, color);
     const base64 = btoa(svg);
     return `data:image/svg+xml;base64,${base64}`;
   } catch (e) {

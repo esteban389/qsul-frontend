@@ -68,7 +68,7 @@ const columns: ColumnDef<Audit>[] = [
         </Button>
       );
     },
-    filterFn: 'equalsStringSensitive', // use built-in filter function
+    filterFn: 'equalsString', // use built-in filter function
     cell: ({ row }) => {
       return eventTranslations[row.original.event];
     },
