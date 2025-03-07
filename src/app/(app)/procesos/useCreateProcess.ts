@@ -1,6 +1,7 @@
 import backendClient from '@/services/backendClient';
 import { CreateProcessRequest } from '@/types/process';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import revalidateProcesses from '@/app/(app)/procesos/revalidateProcesses';
 
 function sendRequest(request: CreateProcessRequest) {
   return backendClient.post('/api/processes', request, {
@@ -18,5 +19,6 @@ export default function useCreateProcess(request: CreateProcessRequest) {
     onSettled: () => {
       return queryClient.invalidateQueries({ queryKey: ['processes'] });
     },
+    onSuccess: () => revalidateProcesses(),
   });
 }

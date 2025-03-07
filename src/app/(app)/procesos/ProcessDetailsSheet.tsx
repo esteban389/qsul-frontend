@@ -125,8 +125,8 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
 
   const onDelete = () => {
     toast.promise(deleteMutation.mutateAsync(), {
-      loading: `Eliminando a ${process.name}`,
-      success: `${process.name} ha sido eliminado`,
+      loading: `Desactivando a ${process.name}`,
+      success: `${process.name} ha sido desactivado`,
       error: error => {
         if (error instanceof AxiosError) {
           const body = error.response?.data;
@@ -135,7 +135,7 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
           }
           return `Ocurrió un error inesperado: ${error.message}`;
         }
-        return `Error al eliminar a ${process.name}`;
+        return `Error al desactivar a ${process.name}`;
       },
     });
   };
@@ -341,7 +341,7 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
               </Button>
             ) : (
               <DeleteProcessAlert name={process.name} action={onDelete}>
-                <Button variant="destructive">Eliminar</Button>
+                <Button variant="destructive">Desactivar</Button>
               </DeleteProcessAlert>
             )}
           </SheetClose>
@@ -370,14 +370,14 @@ function DeleteProcessAlert({
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Eliminar proceso {name}</AlertDialogTitle>
+          <AlertDialogTitle>Desactivar proceso {name}</AlertDialogTitle>
           <AlertDialogDescription>
-            ¿Estás seguro de que deseas eliminar el proceso {name}?
+            ¿Estás seguro de que deseas desactivar el proceso {name}?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={action}>Eliminar</AlertDialogAction>
+          <AlertDialogAction onClick={action}>Desactivar</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

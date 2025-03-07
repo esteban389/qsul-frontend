@@ -105,8 +105,8 @@ function CampusSheetContent({ campus }: Readonly<{ campus: Campus }>) {
 
   const onDelete = () => {
     toast.promise(deleteMutation.mutateAsync(), {
-      loading: `Eliminando a ${campus.name}`,
-      success: `${campus.name} ha sido eliminado`,
+      loading: `Desactivar a ${campus.name}`,
+      success: `${campus.name} ha sido desactivado`,
       error: error => {
         if (error instanceof AxiosError) {
           const body = error.response?.data;
@@ -115,7 +115,7 @@ function CampusSheetContent({ campus }: Readonly<{ campus: Campus }>) {
           }
           return `Ocurrió un error inesperado: ${error.message}`;
         }
-        return `Error al eliminar a ${campus.name}`;
+        return `Error al desactivar a ${campus.name}`;
       },
     });
   };
@@ -218,7 +218,7 @@ function CampusSheetContent({ campus }: Readonly<{ campus: Campus }>) {
               </Button>
             ) : (
               <DeleteCampusAlert name={campus.name} action={onDelete}>
-                <Button variant="destructive">Eliminar</Button>
+                <Button variant="destructive">Desactivar</Button>
               </DeleteCampusAlert>
             )}
           </SheetClose>
@@ -246,14 +246,14 @@ function DeleteCampusAlert({
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Eliminar seccional {name}</AlertDialogTitle>
+          <AlertDialogTitle>Desactivar seccional {name}</AlertDialogTitle>
           <AlertDialogDescription>
-            ¿Estás seguro de que deseas eliminar la seccional {name}?
+            ¿Estás seguro de que deseas desactivar la seccional {name}?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={action}>Eliminar</AlertDialogAction>
+          <AlertDialogAction onClick={action}>Desactivar</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

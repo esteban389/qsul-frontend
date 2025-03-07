@@ -204,7 +204,9 @@ function CreateProcessModal() {
     if (nameResult.success && iconResult.success) {
       toast.promise(createProcessMutation.mutateAsync(), {
         loading: 'Creando proceso...',
-        success: 'Proceso creado correctamente',
+        success: () => {
+          return 'Proceso creado correctamente';
+        },
         error: 'Error al crear el proceso',
       });
       return;

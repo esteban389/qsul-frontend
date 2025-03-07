@@ -55,9 +55,9 @@ function UserSheetContent({ user }: { user: User }) {
   const { data: userDetails, isPending } = useUserById({ id: user.id });
   const onDelete = () => {
     toast.promise(deleteUserMutation.mutateAsync(), {
-      loading: `Deshabilitando a ${user.name}`,
-      success: `${user.name} ha sido deshabilitado eliminado`,
-      error: `Error al deshabilitar a ${user.name}`,
+      loading: `Desactivando a ${user.name}`,
+      success: `${user.name} ha sido desactivando`,
+      error: `Error al desactivar a ${user.name}`,
     });
   };
   const onRestore = () => {
@@ -108,7 +108,7 @@ function UserSheetContent({ user }: { user: User }) {
             </SheetClose>
           ) : (
             <DeleteUserAlert name={user.name} action={onDelete}>
-              <Button variant="destructive">Eliminate</Button>
+              <Button variant="destructive">Desactivar</Button>
             </DeleteUserAlert>
           )}
         </SheetFooter>
@@ -131,14 +131,14 @@ function DeleteUserAlert({
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Eliminar a {name}</AlertDialogTitle>
+          <AlertDialogTitle>Desactivar a {name}</AlertDialogTitle>
           <AlertDialogDescription>
-            ¿Estás seguro de que deseas eliminar a {name}?
+            ¿Estás seguro de que deseas desactivar a {name}?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={action}>Eliminar</AlertDialogAction>
+          <AlertDialogAction onClick={action}>Desactivar</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

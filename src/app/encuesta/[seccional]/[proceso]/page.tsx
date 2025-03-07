@@ -10,24 +10,25 @@ import EmployeesList from './EmployeesList';
 export default async function page({
   params,
 }: {
-  params: { seccional: string; proceso: string };
+  params: Promise<{ seccional: string; proceso: string }>;
 }) {
+  const pathParams = await params;
   try {
-    await backendClient.get(`/api/campuses/${params.seccional}`);
-    await backendClient.get(`/api/processes/${params.proceso}`);
+    await backendClient.get(`/api/campuses/${pathParams.seccional}`);
+    await backendClient.get(`/api/processes/${pathParams.proceso}`);
   } catch (error) {
     notFound();
   }
   const employees = (
     await backendClient.get<Employee[]>(
-      `/api/employees?filter[process.token]=${params.proceso}`,
+      `/api/employees?filter[process.token]=${pathParams.proceso}`,
     )
   ).data;
 
   return (
     <div className="relative flex h-full flex-col gap-4">
       <Link
-        href={`/encuesta/${params.seccional}`}
+        href={`/encuesta/${pathParams.seccional}`}
         className={cn(buttonVariants(), 'static left-0 top-0 md:absolute')}>
         <ChevronLeft />
       </Link>
@@ -39,8 +40,8 @@ export default async function page({
       </p>
       <EmployeesList
         employees={employees}
-        seccional={params.seccional}
-        proceso={params.proceso}
+        seccional={pathParams.seccional}
+        proceso={pathParams.proceso}
       />
     </div>
   );

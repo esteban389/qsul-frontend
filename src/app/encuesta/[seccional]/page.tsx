@@ -15,10 +15,11 @@ export const revalidate = 3600;
 export default async function page({
   params,
 }: {
-  params: { seccional: string };
+  params: Promise<{ seccional: string }>;
 }) {
+  const pathParams = await params;
   try {
-    await backendClient.get(`/api/campuses/${params.seccional}`);
+    await backendClient.get(`/api/campuses/${pathParams.seccional}`);
   } catch (error) {
     notFound();
   }
@@ -43,7 +44,7 @@ export default async function page({
           {processses.map(process => (
             <Link
               key={process.id}
-              href={`/encuesta/${params.seccional}/${process.token}`}>
+              href={`/encuesta/${pathParams.seccional}/${process.token}`}>
               <Card className="transition-all hover:scale-105 hover:shadow-2xl">
                 <CardHeader className="flex flex-row items-center gap-2">
                   <Avatar>

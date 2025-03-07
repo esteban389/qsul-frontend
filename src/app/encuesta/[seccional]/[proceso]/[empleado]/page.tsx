@@ -6,23 +6,26 @@ import { loadSerachParams } from './nuqsLoader';
 import PageContent from './PageContent';
 
 export interface PageProps {
-  params: { seccional: string; proceso: string; empleado: string };
+  params: Promise<{ seccional: string; proceso: string; empleado: string }>;
   searchParams: Promise<SearchParams>;
 }
 export default async function page({ params, searchParams }: PageProps) {
+  const pathParams = await params;
   try {
-    await backendClient.get(`/api/campuses/${params.seccional}`);
-    await backendClient.get(`/api/processes/${params.proceso}`);
+    await backendClient.get(`/api/campuses/${pathParams.seccional}`);
+    await backendClient.get(`/api/processes/${pathParams.proceso}`);
   } catch (error) {
     notFound();
   }
   const employee = (
     await backendClient
-      .get<Employee>(`/api/employees/${params.empleado}?include=services`)
+      .get<Employee>(`/api/employees/${pathParams.empleado}?include=services`)
       .catch(() => notFound())
   ).data;
 
   const { service } = await loadSerachParams(searchParams);
 
-  return <PageContent service={service} employee={employee} params={params} />;
+  return (
+    <PageContent service={service} employee={employee} params={pathParams} />
+  );
 }

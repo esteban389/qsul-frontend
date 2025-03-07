@@ -1,6 +1,7 @@
 import backendClient from '@/services/backendClient';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreateEmployeeRequest } from '@/types/employee';
+import revalidateEmployees from '@/app/(app)/empleados/revalidateEmployees';
 
 function sendRequest(request: CreateEmployeeRequest) {
   return backendClient.post('api/employees', request, {
@@ -15,5 +16,6 @@ export default function useCreateEmployee(request: CreateEmployeeRequest) {
   return useMutation({
     mutationFn: () => sendRequest(request),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['employees'] }),
+    onSuccess: () => revalidateEmployees(),
   });
 }

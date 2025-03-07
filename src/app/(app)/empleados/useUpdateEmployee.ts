@@ -1,6 +1,7 @@
 import backendClient from '@/services/backendClient';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { UpdateEmployeeRequest } from '@/types/employee';
+import revalidateEmployees from '@/app/(app)/empleados/revalidateEmployees';
 
 function sendRequest(id: number, data: UpdateEmployeeRequest) {
   return backendClient.post(`/api/employees/${id}`, data, {
@@ -18,5 +19,6 @@ export default function useUpdateService(
   return useMutation({
     mutationFn: () => sendRequest(id, data),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['employees'] }),
+    onSuccess: () => revalidateEmployees(),
   });
 }

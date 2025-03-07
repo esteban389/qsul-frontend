@@ -43,6 +43,7 @@ import {
   CampusNameSchema,
 } from '@/Schemas/UniversitySchema';
 import CampusDetailsSheet from '@/app/(app)/seccionales/CampusDetailsSheet';
+import revalidateCampuses from '@/app/(app)/seccionales/revalidateCampuses';
 import useCampuses from './useCampuses';
 import columns from './TableDefinition';
 
@@ -192,9 +193,10 @@ function CreateCampusModal() {
     const addressResult = safeParse(CampusAddressSchema, address);
     const iconResult = safeParse(CampusIconSchema, icon);
     if (nameResult.success && iconResult.success && addressResult.success) {
+      revalidateCampuses();
       toast.promise(createCampusMutation.mutateAsync(), {
         loading: 'Creando seccional...',
-        success: 'Seccional creado correctamente',
+        success: () => 'Seccional creado correctamente',
         error: 'Error al crear la seccional',
       });
       return;

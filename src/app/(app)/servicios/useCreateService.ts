@@ -1,6 +1,7 @@
 import { CreateServiceRequest } from '@/types/service';
 import backendClient from '@/services/backendClient';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import revalidateServices from '@/app/(app)/servicios/revalidateServices';
 
 function sendRequest(request: CreateServiceRequest) {
   return backendClient.post('api/services', request, {
@@ -15,5 +16,6 @@ export default function useCreateService(request: CreateServiceRequest) {
   return useMutation({
     mutationFn: () => sendRequest(request),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['services'] }),
+    onSuccess: () => revalidateServices(),
   });
 }

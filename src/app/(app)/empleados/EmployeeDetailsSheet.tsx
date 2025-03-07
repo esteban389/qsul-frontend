@@ -132,8 +132,8 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
 
   const onDelete = () => {
     toast.promise(deleteMutation.mutateAsync(), {
-      loading: `Eliminando a ${employee.name}`,
-      success: `${employee.name} ha sido eliminado`,
+      loading: `Desactivando a ${employee.name}`,
+      success: `${employee.name} ha sido desactivado`,
       error: error => {
         if (error instanceof AxiosError) {
           const body = error.response?.data;
@@ -142,7 +142,7 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
           }
           return `Ocurrió un error inesperado: ${error.message}`;
         }
-        return `Error al eliminar a ${employee.name}`;
+        return `Error al desactivar a ${employee.name}`;
       },
     });
   };
@@ -315,7 +315,7 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
               </Button>
             ) : (
               <DeleteProcessAlert name={employee.name} action={onDelete}>
-                <Button variant="destructive">Eliminar</Button>
+                <Button variant="destructive">Desactivar</Button>
               </DeleteProcessAlert>
             )}
           </SheetClose>
@@ -344,14 +344,14 @@ function DeleteProcessAlert({
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Eliminar proceso {name}</AlertDialogTitle>
+          <AlertDialogTitle>Desactivar proceso {name}</AlertDialogTitle>
           <AlertDialogDescription>
-            ¿Estás seguro de que deseas eliminar el proceso {name}?
+            ¿Estás seguro de que deseas desactivar el proceso {name}?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={action}>Eliminar</AlertDialogAction>
+          <AlertDialogAction onClick={action}>Desactivar</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
