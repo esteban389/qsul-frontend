@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * Hook that tracks whether a value has been modified from its initial state
  * @param value - The value to track
+ * @param defaultValue - The default value to compare against
  * @returns boolean indicating if the value has been modified from its initial state
  */
 function useIsModified<T>(value: T, defaultValue: T): boolean {

@@ -67,7 +67,7 @@ function AppSidebarItem({ route }: { route: Route }) {
     ('children' in route &&
       route.children?.some(() => pathname.startsWith(route.path)));
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem className="list-none">
       <SidebarMenuButton
         className="truncate hover:bg-transparent"
         tooltip={route.displayName}
