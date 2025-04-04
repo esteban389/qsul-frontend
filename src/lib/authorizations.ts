@@ -29,6 +29,7 @@ const authorizations: RoleAuthorization = {
     { entity: 'campus', operation: 'update' },
     { entity: 'campus', operation: 'delete' },
     { entity: 'employee', operation: 'read' },
+    { entity: 'employee', operation: 'delete' },
     { entity: 'process', operation: 'create' },
     { entity: 'process', operation: 'read' },
     { entity: 'process', operation: 'update' },
