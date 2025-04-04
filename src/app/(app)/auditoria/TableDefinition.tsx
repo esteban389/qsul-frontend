@@ -33,19 +33,30 @@ const columns: ColumnDef<Audit>[] = [
     },
     cell: ({ row }) => (
       <div className="flex flex-row items-center gap-4">
-        <Avatar>
-          <AvatarImage
-            src={
-              row.original.author.avatar
-                ? env('API_URL') + row.original.author.avatar
-                : undefined
-            }
-          />
-          <AvatarFallback>
-            {getInitials(row.original.author.name)}
-          </AvatarFallback>
-        </Avatar>
-        {row.original.author.name}
+        {row.original.author ? (
+          <>
+            <Avatar>
+              <AvatarImage
+                src={
+                  row.original.author.avatar
+                    ? env('API_URL') + row.original.author.avatar
+                    : undefined
+                }
+              />
+              <AvatarFallback>
+                {getInitials(row.original.author.name)}
+              </AvatarFallback>
+            </Avatar>
+            {row.original.author.name}
+          </>
+        ) : (
+          <>
+            <Avatar>
+              <AvatarFallback>AN</AvatarFallback>
+            </Avatar>
+            Anónimo
+          </>
+        )}
       </div>
     ),
   },
