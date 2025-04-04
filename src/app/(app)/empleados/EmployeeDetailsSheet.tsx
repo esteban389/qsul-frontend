@@ -6,8 +6,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { ChangeEvent, MouseEvent, ReactNode, useState } from 'react';
-import { getInitials } from '@/lib/utils';
+import { ChangeEvent, MouseEvent, ReactNode, useEffect, useState } from 'react';
+import { downloadURI, getInitials } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import env from '@/lib/env';
 import { Input } from '@/components/ui/input';
@@ -54,6 +54,15 @@ import useRestoreEmployee from './useRestoreEmployee';
 import useServices from '../servicios/useServices';
 import useAddServiceToEmployee from './useAddServiceToEmployee';
 import useRemoveServiceToEmployee from './useRemoveServiceToEmployee';
+import useEmployeeUrl from '@/app/(app)/empleados/useEmployeeUrl';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import QRCode from 'qrcode';
 
 export default function EmployeeDetailsSheet({
   employee,
@@ -65,7 +74,7 @@ export default function EmployeeDetailsSheet({
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="flex h-full flex-col">
+      <SheetContent className="flex flex-col">
         <EmployeeSheetContent employee={employee} />
       </SheetContent>
     </Sheet>
@@ -88,6 +97,8 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
   } = useProcesses({
     deleted_at: 'null',
   });
+
+  const { data } = useEmployeeUrl(employee.id);
   const updateMutation = useUpdateService(employee.id, {
     avatar,
     name,
@@ -228,12 +239,26 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
               />
               <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
             </Avatar>
-            {can('update', 'employee') && (
-              <div>
-                <Input name="avatar" onChange={onAvatarChange} type="file" />
-                {errors?.avatar && <ErrorText>{errors.avatar}</ErrorText>}
-              </div>
-            )}
+            <div className="flex flex-col gap-4">
+              {can('update', 'employee') && (
+                <div>
+                  <Input name="avatar" onChange={onAvatarChange} type="file" />
+                  {errors?.avatar && <ErrorText>{errors.avatar}</ErrorText>}
+                </div>
+              )}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>Código de Encuesta</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogTitle>Código QR de Encuesta</DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Código QR para la encuesta de {employee.name}
+                  </DialogDescription>
+                  <QRCodeView url={data?.url} employeeName={employee.name} />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
           <div>
             <Label htmlFor="name">Nombre</Label>
@@ -516,5 +541,37 @@ function ServiceItem({
         </Button>
       )}
     </li>
+  );
+}
+
+function QRCodeView({
+  url,
+  employeeName,
+}: Readonly<{ url: string | undefined; employeeName: string }>) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const toDataUrl = async () => {
+      const result = await QRCode.toDataURL(url);
+      setDataUrl(result);
+    };
+    if (url) {
+      toDataUrl();
+    }
+  }, [url]);
+
+  if (!dataUrl) {
+    return (
+      <div className="flex h-48 w-full items-center justify-center">
+        <LoaderCircle className="size-12 animate-spin" />
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col items-center justify-center space-y-4">
+      <img src={dataUrl} alt="QR Code" />
+      <Button onClick={() => downloadURI(dataUrl, `Código QR ${employeeName}`)}>
+        Descargar
+      </Button>
+    </div>
   );
 }
