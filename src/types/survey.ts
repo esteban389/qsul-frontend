@@ -23,4 +23,5 @@ export type AnswerSurveyRequest = {
     question_id: number;
     answer: number;
   }[];
+  observation: string;
 };

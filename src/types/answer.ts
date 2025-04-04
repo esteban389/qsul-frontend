@@ -25,6 +25,7 @@ export type Answer = {
   };
   observations?: Observation[];
   answer_questions?: AnswerQuestions[];
+  answer_observation?: AnswerObservation;
 };
 
 export type AnswerQuestions = {
@@ -37,6 +38,14 @@ export type AnswerQuestions = {
   deleted_at: string;
   question: Question;
 };
+
+export type AnswerObservation = {
+  id: string;
+  observation: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string;
+}
 
 export type GetAnswersRequestFilters = {
   survey_id?: number;
