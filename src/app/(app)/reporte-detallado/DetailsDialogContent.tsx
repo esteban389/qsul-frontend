@@ -23,7 +23,7 @@ import {
   BriefcaseBusiness,
   Package,
 } from 'lucide-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import useAuth from '@/hooks/useAuth';
 import env from '@/lib/env';
 import QueryRenderer from '@/components/QueryRenderer';
@@ -223,8 +223,8 @@ type GroupedQuestions = {
 };
 
 export function AnswerQuestionsList({ data }: { data: Required<Answer> }) {
-  const groupedQuestions = data.answer_questions.reduce<GroupedQuestions>(
-    (acc, aq) => {
+  const groupedQuestions = useMemo(() => {
+    return data.answer_questions.reduce<GroupedQuestions>((acc, aq) => {
       const category =
         aq.question.type === 'yesno' ? 'Sí/No' : 'Selección Múltiple';
       if (!acc[category]) {
@@ -232,9 +232,8 @@ export function AnswerQuestionsList({ data }: { data: Required<Answer> }) {
       }
       acc[category]!.push(aq);
       return acc;
-    },
-    {},
-  );
+    }, {});
+  }, [data]);
 
   return (
     <div className="space-y-6">
@@ -250,6 +249,14 @@ export function AnswerQuestionsList({ data }: { data: Required<Answer> }) {
           questions={questions}
         />
       ))}
+      {data?.answer_observation && (
+        <motion.section
+          {...fadeInUp}
+          className="space-y-2 rounded-xl bg-white p-4 shadow-sm">
+          <h4 className="mb-3 text-sm font-bold text-muted-foreground">Observación del encuestado</h4>
+          <p className="text-sm text-muted-foreground">{data.answer_observation.observation}</p>
+        </motion.section>
+      )}
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { Question } from '@/types/question';
 import { Survey } from '@/types/survey';
 import { ChevronLeft } from 'lucide-react';
 import { parseAsInteger, useQueryState } from 'nuqs';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import useStorage from '@/hooks/use-storage';
 import { toast } from 'sonner';
@@ -22,6 +22,7 @@ import { AxiosError } from 'axios';
 import Fireworks from 'react-canvas-confetti/dist/presets/fireworks';
 import useSubmitSurvey from './useSubmitSurvey';
 import { EMPLOYEE_SERVICE_PARAM, SERVICE_PARAM } from './ServicesList';
+import { Textarea } from '@/components/ui/textarea';
 
 function Loading() {
   return (
@@ -35,7 +36,7 @@ function Completed() {
   return (
     <div className="flex size-full flex-col items-center justify-center">
       <span className="text-[5rem]">🥳</span>
-      <Fireworks autorun={{ speed: 1 }} />
+      <Fireworks autorun={{ speed: 3, duration: 5000 }} />
       <h1 className="w-full text-center text-[3rem] font-bold">
         ¡Gracias por completar la encuesta!
       </h1>
@@ -89,6 +90,7 @@ function Questions({ data: survey }: { data: Survey }) {
     'sessionStorage',
   );
   const [direction, setDirection] = useState(0);
+  const [observation, setObservation] = useState('');
   const [answers, setAnswers] = useStorage<Answer[]>(
     'survey',
     [],
@@ -104,50 +106,21 @@ function Questions({ data: survey }: { data: Survey }) {
     '',
     'sessionStorage',
   );
+
   const submitMutation = useSubmitSurvey({
     version: survey.version,
     respondent_type_id: Number(userType),
     email,
     employee_service_id: selectedEmployeeService,
     answers,
+    observation,
   });
 
   const questions = survey.questions.filter(
     q => q.service_id === selectedService || q.service_id === null,
   );
 
-  const handleNavigation = (isNext: boolean) => {
-    if (isNext && currentQuestion < questions.length - 1) {
-      setDirection(1);
-      setCurrentQuestion(prev => prev + 1);
-    } else if (!isNext) {
-      setDirection(-1);
-      if (currentQuestion > 0) {
-        setCurrentQuestion(prev => prev - 1);
-      } else {
-        setSelectedService(0);
-        setSelectedEmployeeService(0);
-        setEmail('');
-        setUserType('');
-        setCurrentQuestion(0);
-        setAnswers([]);
-      }
-    }
-  };
-
-  const handleAnswer = (answer: number) => {
-    const currentQuestionId = questions[currentQuestion].id;
-    setAnswers(prev => {
-      // Remove previous answer for this question if it exists
-      const filtered = prev.filter(a => a.question_id !== currentQuestionId);
-      return [...filtered, { question_id: currentQuestionId, answer }];
-    });
-
-    // Only navigate if there are more questions
-    if (currentQuestion < questions.length - 1) {
-      handleNavigation(true);
-      return;
-    }
+  const submit = () => {
     toast.promise(submitMutation.mutateAsync(), {
       loading: 'Enviando respuestas...',
       success: () => {
@@ -175,11 +148,47 @@ function Questions({ data: survey }: { data: Survey }) {
       },
     });
   };
+  const handleNavigation = (isNext: boolean) => {
+    if (isNext && currentQuestion < questions.length) {
+      setDirection(1);
+      setCurrentQuestion(prev => prev + 1);
+    } else if (!isNext) {
+      setDirection(-1);
+      if (currentQuestion > 0) {
+        setCurrentQuestion(prev => prev - 1);
+      } else {
+        setSelectedService(0);
+        setSelectedEmployeeService(0);
+        setEmail('');
+        setUserType('');
+        setCurrentQuestion(0);
+        setAnswers([]);
+      }
+    }
+  };
+
+  const handleAnswer = (answer: number) => {
+    const currentQuestionId = questions[currentQuestion].id;
+    setAnswers(prev => {
+      // Remove previous answer for this question if it exists
+      const filtered = prev.filter(a => a.question_id !== currentQuestionId);
+      return [...filtered, { question_id: currentQuestionId, answer }];
+    });
+
+    // Only navigate if there are more questions
+    if (currentQuestion < questions.length) {
+      handleNavigation(true);
+      return;
+    }
+  };
 
   // Get the current answer if it exists
-  const currentAnswer = answers.find(
-    a => a.question_id === questions[currentQuestion].id,
-  )?.answer;
+  const currentAnswer = useMemo(() => {
+    if (currentQuestion < questions.length) {
+      return answers.find(a => a.question_id === questions[currentQuestion].id)
+        ?.answer;
+    }
+  }, []);
 
   if (surveyVersion !== survey.version) {
     setAnswers([]);
@@ -188,6 +197,15 @@ function Questions({ data: survey }: { data: Survey }) {
     return <LoadingContent />;
   }
 
+  if (questions.length === 0) {
+    return (
+      <div className="flex size-full items-center justify-center">
+        <h1 className="text-center text-4xl">
+          No hay preguntas disponibles para esta encuesta
+        </h1>
+      </div>
+    );
+  }
   return (
     <>
       <Button
@@ -197,19 +215,53 @@ function Questions({ data: survey }: { data: Survey }) {
       </Button>
       {!submitMutation.isSuccess && (
         <AnimatePresence mode="wait" custom={direction}>
-          <QuestionItem
-            question={questions[currentQuestion]}
-            onAnswer={handleAnswer}
-            direction={direction}
-            currentAnswer={currentAnswer}
-            key={currentQuestion}
-          />
+          {currentQuestion < questions.length ? (
+            <QuestionItem
+              question={questions[currentQuestion]}
+              onAnswer={handleAnswer}
+              direction={direction}
+              currentAnswer={currentAnswer}
+              key={currentQuestion}
+            />
+          ) : (
+            <motion.div
+              className="flex h-full flex-col items-center justify-center gap-8"
+              variants={{
+                center: {
+                  x: 0,
+                  opacity: 1,
+                },
+                exit: (direction: number) => ({
+                  x: direction > 0 ? -70 : 70,
+                  opacity: 0,
+                }),
+              }}
+              custom={direction}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                duration: 0.3,
+                ease: 'easeInOut',
+              }}>
+              <h1 className="w-full text-center text-[3rem] font-bold">
+                Por favor, déjanos tu opinión
+              </h1>
+              <Textarea
+                className="bg-white"
+                value={observation}
+                onChange={e => setObservation(e.target.value)}
+              />
+              <Button disabled={submitMutation.isPending} onClick={()=>submit()}>Enviar</Button>
+            </motion.div>
+          )}
         </AnimatePresence>
       )}
       {submitMutation.isSuccess && <Completed />}
     </>
   );
 }
+
 function QuestionItem({
   question,
   onAnswer,

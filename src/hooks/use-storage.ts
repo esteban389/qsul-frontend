@@ -96,7 +96,7 @@ function replacer(_: unknown, value: unknown) {
 
 function receiver(_: unknown, value: unknown) {
   if (typeof value === 'object' && value !== null) {
-    if (value?.dataType === 'Map') {
+    if ('dataType' in value && value.dataType === 'Map' && 'value' in value && Array.isArray(value.value)) {
       return new Map(value.value);
     }
   }

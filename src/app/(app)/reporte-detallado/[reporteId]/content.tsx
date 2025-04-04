@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Answer } from '@/types/answer';
-import React from 'react';
+import React, { useMemo } from 'react';
 import env from '@/lib/env';
 import {
   Card,
@@ -21,9 +21,13 @@ import ObservationItem from './ObservationItem';
 
 export default function Content({ data }: { data: Required<Answer> }) {
   const { user } = useAuth({ middleware: 'auth' });
-  const orderedObservations = data.observations.sort((a, b) => {
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
+  const orderedObservations = useMemo(() => {
+    return data.observations.sort((a, b) => {
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    });
+  }, [data]);
   return (
     <div className="space-y-6 p-4">
       <Card>
