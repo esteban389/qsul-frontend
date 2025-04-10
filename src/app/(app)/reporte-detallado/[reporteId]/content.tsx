@@ -18,6 +18,7 @@ import { AnswerQuestionsList } from '../DetailsDialogContent';
 import CreateObsrvationDialog from './CreateObsrvationDialog';
 import IgnoreButton from './IgnoreButton';
 import ObservationItem from './ObservationItem';
+import SolveButton from './SolveButton';
 
 export default function Content({ data }: { data: Required<Answer> }) {
   const { user } = useAuth({ middleware: 'auth' });
@@ -51,20 +52,27 @@ export default function Content({ data }: { data: Required<Answer> }) {
               {data.employee_service.employee.name[0]}
             </AvatarFallback>
           </Avatar>
-          <div className="size-full flex-1 text-center md:text-left">
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="text-2xl font-bold">
-                  {data.employee_service.employee.name}
-                </CardTitle>
-                <h2 className="text-lg font-medium">
-                  {data.employee_service.employee.email}
-                </h2>
-                <CardDescription className="text-md text-neutral-600">
-                  {data.employee_service.service.name}
-                </CardDescription>
-              </div>
-              <IgnoreButton answer={data} />
+          <div className=" size-full flex-1 text-center md:text-left flex flex-col md:flex-row items-center gap-2 justify-between">
+            <div>
+              <CardTitle className="text-2xl font-bold">
+                {data.employee_service.employee.name}
+              </CardTitle>
+              <h2 className="text-lg font-medium">
+                {data.employee_service.employee.email}
+              </h2>
+              <CardDescription className="text-md text-neutral-600">
+                {data.employee_service.service.name}
+              </CardDescription>
+            </div>
+            <div className='flex items-center gap-2'>
+              {data.solved_at ? (
+                <p className="text-sm text-green-600">Resuelto: {formatDate(data.solved_at)}</p>
+              ) : (
+                <>
+                  <IgnoreButton answer={data} />
+                  <SolveButton answer={data} />
+                </>
+              )}
             </div>
           </div>
         </CardHeader>

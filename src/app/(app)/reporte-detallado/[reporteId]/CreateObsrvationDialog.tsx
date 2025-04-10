@@ -49,7 +49,7 @@ export default function CreateObsrvationDialog({
 }: {
   willIgnore?: boolean;
 }) {
-  const params = useParams();
+  const params = useParams<{ reporteId: string }>();
   const [visible, setVisible] = useState(false);
   const [description, setDescription] = useState('');
   const [type, setType] = useState<ObservationType>(
@@ -86,6 +86,7 @@ export default function CreateObsrvationDialog({
         loading: 'Guardando observación...',
         success: () => {
           setVisible(false);
+          setDescription('');
           return 'Observación guardada exitosamente';
         },
         error: 'Ocurrió un error al guardar la observación',

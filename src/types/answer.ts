@@ -26,6 +26,7 @@ export type Answer = {
   observations?: Observation[];
   answer_questions?: AnswerQuestions[];
   answer_observation?: AnswerObservation;
+  solved_at?: string;
 };
 
 export type AnswerQuestions = {
