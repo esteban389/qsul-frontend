@@ -5,7 +5,7 @@ import useAuth from '@/hooks/useAuth';
 import UserDropdown from '@/components/UserDropdown';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/AppSidebar';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import RouteBreadcrumb from '@/components/RouteBreadcrumb';
 import { useRouteByPath } from '@/lib/routes';
 import { notFound, usePathname } from 'next/navigation';
@@ -32,7 +32,10 @@ function AppLayout({ children }: Readonly<{ children: ReactNode }>) {
             <UserDropdown user={user} logout={logout} />
           </div>
         </header>
-        <ScrollArea className="h-full">{children}</ScrollArea>
+        <ScrollArea className="h-full">
+          {children}
+          <ScrollBar orientation='horizontal' />
+          </ScrollArea>
       </div>
     </SidebarProvider>
   );
