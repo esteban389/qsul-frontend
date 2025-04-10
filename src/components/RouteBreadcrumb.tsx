@@ -90,12 +90,14 @@ function RouteBreadcrumb() {
         {segments.length > 0 && <BreadcrumbSeparator />}
 
         {segments.map((segment, index) => (
-          <BreadcrumbItem key={segment.path}>
-            <BreadcrumbLink asChild>
-              <Link href={segment.path}>{segment.displayName}</Link>
-            </BreadcrumbLink>
-            {index < segments.length - 1 && <BreadcrumbSeparator />}
-          </BreadcrumbItem>
+          <>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href={segment.path}>{segment.displayName}</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            {index < segments.length - 1 && <BreadcrumbSeparator key={segment.path +"-separator"} />}
+          </>
         ))}
       </BreadcrumbList>
     </Breadcrumb>
