@@ -2,16 +2,18 @@ import backendClient from '@/services/backendClient';
 import { Employee } from '@/types/employee';
 import { useQuery } from '@tanstack/react-query';
 
-export type ServiceFilters = {
+export type EmployeesFilters = {
   name?: string;
   deleted_at?: string;
+  campus_id?: number;
   include?: string[];
 };
 
-async function getEmployees(filters: ServiceFilters = {}) {
+async function getEmployees(filters: EmployeesFilters = {}) {
   const params = {
     'filter[name]': filters.name,
     'filter[deleted_at]': filters.deleted_at,
+    'filter[campus_id]': filters.campus_id,
     include: filters.include && filters.include.join(','),
   };
 
@@ -21,7 +23,7 @@ async function getEmployees(filters: ServiceFilters = {}) {
   return response.data;
 }
 
-export default function useEmployees(filters: ServiceFilters = {}) {
+export default function useEmployees(filters: EmployeesFilters = {}) {
   return useQuery({
     queryKey: ['employees', filters],
     queryFn: () => getEmployees(filters),

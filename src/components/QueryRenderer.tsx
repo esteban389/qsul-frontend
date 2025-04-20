@@ -6,10 +6,10 @@ type QueryRendererProps<TData, TError, TSuccessProps extends object> = {
   config: {
     // Required components/renders
     pending: React.ComponentType;
-    success: React.ComponentType<{ data?: TData } & TSuccessProps>;
+    success: React.ComponentType<{ data: TData } & TSuccessProps>;
     error:
-      | React.ComponentType<{ error: TError; retry: () => void }>
-      | ((error: TError, retry: () => void) => React.ReactNode);
+    | React.ComponentType<{ error: TError; retry: () => void }>
+    | ((error: TError, retry: () => void) => React.ReactNode);
 
     // Optional components
     loading?: React.ComponentType;
@@ -20,12 +20,14 @@ type QueryRendererProps<TData, TError, TSuccessProps extends object> = {
   };
   // Additional props to pass to success component
   successProps?: TSuccessProps;
+  resolveEmpty?: (data: TData | undefined) => boolean;
 };
 
 function QueryRenderer<TData, TError, TSuccessProps extends object>({
   query,
   config,
   successProps = {} as TSuccessProps,
+  resolveEmpty
 }: QueryRendererProps<TData, TError, TSuccessProps>) {
   const { data, error, isLoading, isPending, isError, refetch } = query;
 
@@ -38,9 +40,13 @@ function QueryRenderer<TData, TError, TSuccessProps extends object>({
     preferCacheOverFetch = true,
   } = config;
 
+  const isDataEmpty = resolveEmpty
+    ? resolveEmpty(data)
+    : Array.isArray(data) && data.length === 0;
+
   // If we prefer cache and have data, show success even during subsequent fetches
   if (preferCacheOverFetch && data) {
-    if (Array.isArray(data) && data.length === 0 && EmptyComponent) {
+    if (isDataEmpty && EmptyComponent) {
       return <EmptyComponent />;
     }
     return <SuccessComponent data={data} {...successProps} />;
@@ -68,7 +74,7 @@ function QueryRenderer<TData, TError, TSuccessProps extends object>({
 
   // Success with data
   if (data) {
-    if (Array.isArray(data) && data.length === 0 && EmptyComponent) {
+    if (isDataEmpty && EmptyComponent) {
       return <EmptyComponent />;
     }
     return <SuccessComponent data={data} {...successProps} />;

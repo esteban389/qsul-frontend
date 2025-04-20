@@ -201,7 +201,7 @@ function AnswersPage() {
 
   return (
     <motion.main
-      className="mx-4 flex h-full flex-col items-center space-y-6 py-8"
+      className="mx-4 flex h-full flex-col items-center space-y-6 py-8 max-w-[80vw]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}>

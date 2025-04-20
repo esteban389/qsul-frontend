@@ -18,7 +18,7 @@ async function getData(filters?: CampusesFilters) {
   return response.data;
 }
 
-export default function useUsers(filters?: CampusesFilters) {
+export default function useCampuses(filters?: CampusesFilters) {
   return useQuery({
     queryKey: ['campuses', filters],
     queryFn: () => getData(filters),

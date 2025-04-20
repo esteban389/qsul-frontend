@@ -66,14 +66,14 @@ export function convertBinaryUnits(
 }
 
 export function formatDate(
-  date: string,
+  date: string | Date,
   options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   },
 ): string {
-  return new Intl.DateTimeFormat('es-CO', options).format(new Date(date));
+  return new Intl.DateTimeFormat('es-CO', options).format(typeof date === "string" ? new Date(date) : date);
 }
 
 export const RolesTranslations = {
@@ -97,10 +97,10 @@ export const jsonToBase64Image = (
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
-        }
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
       : { r: 0, g: 0, b: 0 };
   };
 
@@ -124,22 +124,21 @@ export const jsonToBase64Image = (
         <rect width="100%" height="100%" fill="${backgroundColor}"/>
         <text x="20" y="40" font-family="monospace" font-size="14">
           ${lines
-            .map(
-              (line, i) => `
+        .map(
+          (line, i) => `
             <tspan
               x="20"
               dy="${i === 0 ? 0 : '1.2em'}"
-              fill="${
-                line.includes('"')
-                  ? primaryColor
-                  : line.includes(':')
-                    ? '#24292e'
-                    : line.match(/true|false|null/)
-                      ? '#005cc5'
-                      : line.match(/\d+/)
-                        ? '#032f62'
-                        : '#24292e'
-              }"
+              fill="${line.includes('"')
+              ? primaryColor
+              : line.includes(':')
+                ? '#24292e'
+                : line.match(/true|false|null/)
+                  ? '#005cc5'
+                  : line.match(/\d+/)
+                    ? '#032f62'
+                    : '#24292e'
+            }"
             >${line
               .replace(/&/g, '&amp;')
               .replace(/</g, '&lt;')
@@ -147,8 +146,8 @@ export const jsonToBase64Image = (
               .replace(/"/g, '&quot;')
               .replace(/'/g, '&apos;')}</tspan>
           `,
-            )
-            .join('')}
+        )
+        .join('')}
         </text>
       </svg>
     `.trim();
@@ -172,10 +171,10 @@ const createSvg = (
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
-        }
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
       : { r: 0, g: 0, b: 0 };
   };
   const getLighterColor = (hex: string): string => {
@@ -208,22 +207,21 @@ const createSvg = (
       <!-- JSON Content -->
       <text x="20" y="60" font-family="monospace" font-size="14">
         ${lines
-          .map(
-            (line, i) => `
+      .map(
+        (line, i) => `
           <tspan
             x="20"
             dy="${i === 0 ? 0 : '1.2em'}"
-            fill="${
-              line.includes('"')
-                ? primaryColor
-                : line.includes(':')
-                  ? '#24292e'
-                  : line.match(/true|false|null/)
-                    ? '#005cc5'
-                    : line.match(/\d+/)
-                      ? '#032f62'
-                      : '#24292e'
-            }"
+            fill="${line.includes('"')
+            ? primaryColor
+            : line.includes(':')
+              ? '#24292e'
+              : line.match(/true|false|null/)
+                ? '#005cc5'
+                : line.match(/\d+/)
+                  ? '#032f62'
+                  : '#24292e'
+          }"
           >${line
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -231,8 +229,8 @@ const createSvg = (
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&apos;')}</tspan>
         `,
-          )
-          .join('')}
+      )
+      .join('')}
       </text>
     </svg>
   `.trim();
@@ -252,7 +250,7 @@ export const jsonToSvgDataUrl = (
   }
 };
 
-export function downloadURI(uri:string, name:string) {
+export function downloadURI(uri: string, name: string) {
   let link = document.createElement("a");
   link.download = name;
   link.href = uri;
