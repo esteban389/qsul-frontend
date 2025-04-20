@@ -27,8 +27,9 @@ export default function SurveySelect({ value, onChange }: { value: string; onCha
 }
 
 function Content({ data }: { data: Survey[] }) {
-  const { setDefaultState } = useFiltersState();
+  const { setDefaultState, getStateSlice } = useFiltersState();
   useEffect(() => {
+    if (getStateSlice("survey") === data[0].id) return;
     setDefaultState(oldDef => ({ ...oldDef, survey: data[0].id, start_date: new Date(data[0].created_at) }))
   }, [])
   return (
