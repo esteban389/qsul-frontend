@@ -10,6 +10,7 @@ import {
   LayoutPanelTop,
   NotebookTabs,
   Package,
+  User,
   Users,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
@@ -201,6 +202,24 @@ const routeGroups: RouteGroup[] = [
         name: 'home',
         path: '/inicio',
         icon: Home,
+        showInSidebar: false,
+        authorizedRoles: [
+          Role.NATIONAL_COORDINATOR,
+          Role.CAMPUS_COORDINATOR,
+          Role.PROCESS_LEADER,
+        ],
+      },
+    ],
+  },
+ {
+    name: 'profile',
+    displayName: 'Perfil',
+    routes: [
+      {
+        displayName: 'Perfil',
+        name: 'profile',
+        path: '/perfil',
+        icon: User,
         showInSidebar: false,
         authorizedRoles: [
           Role.NATIONAL_COORDINATOR,

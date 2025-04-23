@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getInitials } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 import {
   Tooltip,
   TooltipContent,
@@ -18,6 +18,8 @@ import {
 import { LogOut } from 'lucide-react';
 import { User } from '@/types/user';
 import env from '@/lib/env';
+import Link from 'next/link';
+import { buttonVariants } from './ui/button';
 
 function UserDropdown({
   className,
@@ -28,7 +30,7 @@ function UserDropdown({
   user: User;
   logout: () => void;
 }) {
-  const imgSrc = user.avatar ? env('API_URL') + user.avatar : '/';
+  const imgSrc = user.avatar ? `${env('API_URL')}${user.avatar}` : '/';
   return (
     <DropdownMenu>
       <TooltipProvider delayDuration={0}>
@@ -51,6 +53,11 @@ function UserDropdown({
       </TooltipProvider>
       <DropdownMenuContent className="w-fit" collisionPadding={16}>
         <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
+        <DropdownMenuItem asChild>
+          <Link href="/perfil" className={cn(buttonVariants({ variant: 'ghost' }), 'w-full justify-start')}>
+            Perfil
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="flex w-full cursor-pointer hover:!bg-destructive/10"

@@ -32,3 +32,15 @@ export type CreateUserRequest = {
   avatar: File | null;
   campus_id: number | undefined;
 };
+
+export type UpdateProfileRequest = {
+  name: string;
+  email: string;
+  avatar: File | null;
+}
+
+export type UpdatePasswordRequest = {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+};
