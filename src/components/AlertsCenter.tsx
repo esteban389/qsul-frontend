@@ -30,7 +30,7 @@ export default function AlertsCenter() {
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 flex-1">
       <AnimatePresence>
         {importantAlerts.map((notification, index) => (
           <motion.div

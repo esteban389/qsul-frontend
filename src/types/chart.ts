@@ -43,6 +43,7 @@ export type RankingResponse = {
   id: number;
   name: string;
   average_perception: number;
+  answer_count: number;
   image: string;
 }
 
