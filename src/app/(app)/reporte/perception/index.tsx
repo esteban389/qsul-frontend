@@ -71,7 +71,7 @@ function Chart({ data }: { data: PerceptionResponse[] }) {
     fill: `hsl(var(--chart-${indexes[index % indexes.length]}))`,
   }));
   return (
-    <ChartContainer config={{ ...chartConfig, average_perception: { label: "Percepción General" } }}>
+    <ChartContainer config={chartConfig}>
       <BarChart accessibilityLayer data={chartData}>
         <CartesianGrid vertical={false} />
         <XAxis dataKey="name"
@@ -81,12 +81,31 @@ function Chart({ data }: { data: PerceptionResponse[] }) {
         />
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent hideLabel />}
+          content={({ active, payload }) => {
+            if (active && payload && payload.length) {
+              const data = payload[0].payload;
+              return (
+                <div className="rounded-lg border bg-background p-2 shadow-sm">
+                  <div className="flex flex-row justify-between gap-2 w-full">
+                    <div className="flex items-center gap-2">
+                      <div className="size-3 rounded-sm" style={{ backgroundColor: data.fill }} />
+                      <span className="text-[0.70rem] uppercase text-muted-foreground">
+                        {data.name}
+                      </span>
+                    </div>
+                    <span className="font-bold text-muted-foreground">
+                      {data.average_perception.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          }}
         />
         <Bar dataKey="average_perception"
           strokeWidth={2}
           radius={8} />
-
       </BarChart>
     </ChartContainer>
   )

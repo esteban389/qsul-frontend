@@ -17,7 +17,7 @@ const indexes = Array.from({ length: 5 }).map((_, i) => i + 1);
 
 export default function PerceptionGroupQuestion() {
   const [tooltip, setTooltip] = useState(false);
-  const [view, setView] = useState<'radar' | 'bar'>('bar');
+  const [view, setView] = useState<'radar' | 'bar'>('radar');
   const { getRequest, getStateSlice } = useFiltersState();
   const query = usePerceptionGroupQuestion(getRequest());
   return (

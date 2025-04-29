@@ -1,12 +1,12 @@
 import QueryRenderer from "@/components/QueryRenderer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useFiltersState } from "../context/storage";
 import { formatDate } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Label, Pie, PieChart } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { VolumeResponse } from "@/types/chart";
 import LoadingContent from "@/components/LoadingContent";
 import useVolume from "./useVolume";
@@ -56,57 +56,48 @@ function Chart({ data }: { data: VolumeResponse[] }) {
     };
     return acc;
   }, {});
-
-  const chartData = data.map(item => ({
-    ...item,
-    fill: chartConfig[item.name].color,
+  const chartData = data.map((item, index) => ({
+    name: item.name,
+    feedback_count: item.feedback_count,
+    fill: `hsl(var(--chart-${indexes[index % indexes.length]}))`,
   }));
-
-  const totalEncuestados = useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.feedback_count, 0)
-  }, [])
   return (
     <ChartContainer config={chartConfig}>
-      <PieChart>
-        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-        <Pie
-          data={chartData}
-          dataKey="feedback_count"
-          nameKey="name"
-          innerRadius={60}
-          strokeWidth={5}
-        >
-          <Label
-            content={({ viewBox }) => {
-              if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                return (
-                  <text
-                    x={viewBox.cx}
-                    y={viewBox.cy}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                  >
-                    <tspan
-                      x={viewBox.cx}
-                      y={viewBox.cy}
-                      className="fill-foreground text-3xl font-bold"
-                    >
-                      {totalEncuestados.toLocaleString()}
-                    </tspan>
-                    <tspan
-                      x={viewBox.cx}
-                      y={(viewBox.cy || 0) + 24}
-                      className="fill-muted-foreground"
-                    >
-                      Encuestados
-                    </tspan>
-                  </text>
-                )
-              }
-            }}
-          />
-        </Pie>
-      </PieChart>
+      <BarChart accessibilityLayer data={chartData}>
+        <CartesianGrid vertical={false} />
+        <XAxis dataKey="name"
+          tickLine={false}
+          tickMargin={10}
+          axisLine={false}
+        />
+        <ChartTooltip
+          cursor={false}
+          content={({ active, payload }) => {
+            if (active && payload && payload.length) {
+              const data = payload[0].payload;
+              return (
+                <div className="rounded-lg border bg-background p-2 shadow-sm">
+                  <div className="flex flex-row justify-between gap-2 w-full">
+                    <div className="flex items-center gap-2">
+                      <div className="size-3 rounded-sm" style={{ backgroundColor: data.fill }} />
+                      <span className="text-[0.70rem] uppercase text-muted-foreground">
+                        {data.name}
+                      </span>
+                    </div>
+                    <span className="font-bold text-muted-foreground">
+                      {data.feedback_count}
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          }}
+        />
+        <Bar dataKey="feedback_count"
+          strokeWidth={2}
+          radius={8} />
+      </BarChart>
     </ChartContainer>
   )
 }
