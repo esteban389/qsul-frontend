@@ -51,11 +51,21 @@ function UserDropdown({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <DropdownMenuContent className="w-fit" collisionPadding={16}>
+      <DropdownMenuContent className="w-fit max-w-xs" collisionPadding={16}>
         <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
         <DropdownMenuItem asChild>
           <Link href="/perfil" className={cn(buttonVariants({ variant: 'ghost' }), 'w-full justify-start')}>
             Perfil
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/perfil?tab=cambiar-contrasena" className={cn(buttonVariants({ variant: 'ghost' }), 'w-full justify-start')}>
+            Cambiar contraseña
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/perfil?tab=solicitud-cambios" className={cn(buttonVariants({ variant: 'ghost' }), 'w-full justify-start')}>
+            Peticiones de cambio de perfil
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

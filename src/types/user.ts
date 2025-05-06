@@ -44,3 +44,7 @@ export type UpdatePasswordRequest = {
   password: string;
   password_confirmation: string;
 };
+export type RequestProfileChangeRequest = {
+  change_type: 'campus' | 'process' | 'service';
+  new_value: Array<number>;
+};
