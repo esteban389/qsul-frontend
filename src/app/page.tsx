@@ -14,7 +14,6 @@ import { safeParse } from 'valibot';
 import ErrorText from '@/components/ui/ErrorText';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
-import logger from '@/lib/logger';
 import {
   EmailSchema,
   LoginPasswordSchema,
@@ -42,7 +41,6 @@ export default function Home() {
           setServerError(body.message);
         } else {
           toast.error(`Ocurrió un error inesperado: ${error.message}`);
-          logger.error(error.message);
         }
       }
     },
