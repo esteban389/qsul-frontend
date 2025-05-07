@@ -252,7 +252,7 @@ function ProfileChangeRequests() {
     }
     if (requestType === 'service') {
       requestProfileChangeMutation.mutateAsync({
-        change_type: 'service',
+        change_type: 'services',
         new_value: managedServices.map(service => service.id)
       });
     }

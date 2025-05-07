@@ -13,11 +13,117 @@ import ProcessSelect from "./Selects/ProcessSelect";
 import ServiceSelect from "./Selects/ServiceSelect";
 import EmployeeSelect from "./Selects/EmployeeSelect";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { getAvailableFilters, getInitialFilterStep } from "../utils/roleBasedFilters";
+import { useEffect } from "react";
+import { Role, User } from "@/types/user";
+import useAuth from "@/hooks/useAuth";
+import QueryRenderer from "@/components/QueryRenderer";
+import useEmployeeServices from "@/app/(app)/perfil/_components/useEmployeeServices";
+import { Employee } from "@/types/employee";
 
 export default function Filters() {
   const actions = useFiltersState();
   const state = actions.getState();
+  const { user } = useAuth({ middleware: 'auth' });
+
+  // Only fetch employee data if the user is not a National Coordinator
+  const shouldFetchEmployee = user?.role !== Role.NATIONAL_COORDINATOR && user?.employee_id !== null && user?.employee_id !== undefined;
+  const employeeQuery = useEmployeeServices(shouldFetchEmployee ? Number(user?.employee_id) : undefined);
+
   const filterStep = state.step;
+  if (!user) return <FiltersLoading />;
+
+  // For National Coordinators, we don't need to wait for employee data
+  if (user.role === Role.NATIONAL_COORDINATOR) {
+    return (
+      <FiltersContent
+        user={user}
+        employeeData={null}
+        actions={actions}
+        state={state}
+        filterStep={filterStep}
+      />
+    );
+  }
+  return (
+    <QueryRenderer
+      query={employeeQuery}
+      config={{
+        pending: () => <FiltersLoading />,
+        error: () => <FiltersError />,
+        success: (employeeData) => (
+          <FiltersContent
+            user={user}
+            employeeData={employeeData.data}
+            actions={actions}
+            state={state}
+            filterStep={filterStep}
+          />
+        )
+      }}
+    />
+  );
+}
+
+function FiltersLoading() {
+  return (
+    <div className="bg-background rounded-lg shadow-md p-8 text-center">
+      <p className="text-gray-500">Cargando filtros...</p>
+    </div>
+  );
+}
+
+function FiltersError() {
+  return (
+    <div className="bg-background rounded-lg shadow-md p-8 text-center">
+      <p className="text-red-500">Error al cargar los datos del usuario</p>
+    </div>
+  );
+}
+
+// Use a simpler approach with type assertions
+type CategoryKey = keyof typeof categories;
+
+function FiltersContent({
+  user,
+  employeeData,
+  actions,
+  state,
+  filterStep
+}: {
+  user: User;
+  employeeData: Employee | null;
+  actions: any;
+  state: any;
+  filterStep: number
+}) {
+  // Get available filters based on user role
+  const roleFilters = getAvailableFilters(user, employeeData);
+
+  // Set default values based on user role when component mounts
+  useEffect(() => {
+    // Apply role-based default values
+    if (roleFilters.defaultCampusId && state.campus === 0) {
+      actions.selectCampus(roleFilters.defaultCampusId);
+    }
+
+    // If process leader, set their process
+    if (employeeData?.process_id && roleFilters.defaultProcessId && state.process === 0) {
+      actions.selectProcess(roleFilters.defaultProcessId);
+    }
+  }, [user, employeeData, actions, roleFilters, state.campus, state.process]);
+  // Determine the step numbers based on user role
+  const getStepNumber = (baseStep: number): number => {
+    if (user?.role === Role.NATIONAL_COORDINATOR) {
+      return baseStep;
+    } else if (user?.role === Role.CAMPUS_COORDINATOR) {
+      return baseStep;
+    } else if (user?.role === Role.PROCESS_LEADER) {
+      return baseStep - 1;
+    }
+    return baseStep;
+  };
+
   return (
     <Tooltip>
       <div className="bg-background rounded-lg shadow-md flex flex-col md:flex-row w-full">
@@ -82,7 +188,7 @@ export default function Filters() {
                     <Info className="h-4 w-4 text-blue-500" />
                   </div>
                   <p className="text-lg font-semibold text-blue-700 capitalize mt-1">
-                    {categories[state.category]}
+                    {categories[state.category as CategoryKey]}
                   </p>
                 </div>
               </motion.div>
@@ -93,20 +199,41 @@ export default function Filters() {
           </div>
         </div>
         <motion.div className="bg-background flex-[75%] p-6 space-y-6">
-          <motion.div
-            className="relative flex items-start group gap-4"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.7 }}
-          >
-            <div className={`${filterStep > 1 && "step-line"} flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-blue-600 bg-blue-50 after:w-1 after:bg-blue-500 after:absolute after:top-7`}>
-              <span className="text-blue-600 text-sm font-medium">1</span>
-            </div>
-            <div className="flex-1">
-              <Label className="block text-sm font-medium mb-2">Seccional</Label>
-              <CampusSelect value={String(state.campus)} onChange={(value: string) => actions.selectCampus(Number(value))} />
-            </div>
-          </motion.div>
+          {roleFilters.canSelectCampus ? (
+            <motion.div
+              className="relative flex items-start group gap-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <div className={`${filterStep > 1 && "step-line"} flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-blue-600 bg-blue-50 after:w-1 after:bg-blue-500 after:absolute after:top-7`}>
+                <span className="text-blue-600 text-sm font-medium">{getStepNumber(1)}</span>
+              </div>
+              <div className="flex-1">
+                <Label className="block text-sm font-medium mb-2">Seccional</Label>
+                <CampusSelect value={String(state.campus)} onChange={(value: string) => actions.selectCampus(Number(value))} />
+              </div>
+            </motion.div>
+          ) : (
+            user?.campus_id && (
+              <motion.div
+                className="relative flex items-start group gap-4"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <div className={`${filterStep > 1 && "step-line"} flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-blue-600 bg-blue-50 after:w-1 after:bg-blue-500 after:absolute after:top-7`}>
+                  <span className="text-blue-600 text-sm font-medium">{getStepNumber(1)}</span>
+                </div>
+                <div className="flex-1">
+                  <Label className="block text-sm font-medium mb-2">Seccional</Label>
+                  <div className="p-2 bg-gray-100 rounded border border-gray-200 text-gray-700 font-medium">
+                    {`Seccional: ${user.campus_id}`}
+                  </div>
+                </div>
+              </motion.div>
+            )
+          )}
           <AnimatePresence>
             {filterStep > 1 && (
               <motion.div
@@ -116,11 +243,19 @@ export default function Filters() {
                 exit={{ opacity: 0, height: 0 }}
               >
                 <div className={`${filterStep > 2 && "step-line"} flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-blue-600 bg-blue-50 after:w-1 after:bg-blue-500 after:absolute after:top-7`}>
-                  <span className="text-blue-600 text-sm font-medium">2</span>
+                  <span className="text-blue-600 text-sm font-medium">{getStepNumber(2)}</span>
                 </div>
                 <div className="flex-1">
                   <Label className="block text-sm font-medium mb-2">Proceso</Label>
-                  <ProcessSelect value={String(state.process)} onChange={newProcess => actions.selectProcess(Number(newProcess))} />
+                  {roleFilters.canSelectProcess ? (
+                    <ProcessSelect value={String(state.process)} onChange={newProcess => actions.selectProcess(Number(newProcess))} />
+                  ) : (
+                    employeeData?.process && (
+                      <div className="p-2 bg-gray-100 rounded border border-gray-200 text-gray-700 font-medium">
+                        {employeeData.process.name || `Proceso: ${employeeData.process_id}`}
+                      </div>
+                    )
+                  )}
                 </div>
               </motion.div>
             )}
@@ -134,7 +269,7 @@ export default function Filters() {
                 exit={{ opacity: 0, height: 0 }}
               >
                 <div className={`${filterStep > 3 && "step-line"} flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-blue-600 bg-blue-50 after:w-1 after:bg-blue-500 after:absolute after:top-7`}>
-                  <span className="text-blue-600 text-sm font-medium">3</span>
+                  <span className="text-blue-600 text-sm font-medium">{getStepNumber(3)}</span>
                 </div>
                 <div className="flex-1">
                   <Label className="block text-sm font-medium mb-2">Servicio</Label>
@@ -152,7 +287,7 @@ export default function Filters() {
                 exit={{ opacity: 0, height: 0 }}
               >
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-blue-600 bg-blue-50 after:w-1 after:bg-blue-500 after:absolute after:top-7">
-                  <span className="text-blue-600 text-sm font-medium">4</span>
+                  <span className="text-blue-600 text-sm font-medium">{getStepNumber(4)}</span>
                 </div>
                 <div className="flex-1">
                   <Label className="block text-sm font-medium mb-2">Empleado</Label>

@@ -2,12 +2,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import env from '@/lib/env';
-import backendClient from '@/services/backendClient';
+import internalBackendClient from '@/services/internalBackendClient';
 import { Campus } from '@/types/campus';
 import Link from 'next/link';
 
 export default async function page() {
-  const campuses = (await backendClient.get<Campus[]>('/api/campuses')).data;
+  const campuses = (await internalBackendClient.get<Campus[]>('/api/campuses')).data;
   return (
     <div className="flex h-full flex-col gap-4">
       <h1 className="w-full text-center text-2xl font-bold">
