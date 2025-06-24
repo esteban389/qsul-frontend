@@ -36,7 +36,7 @@ export type CreateUserRequest = {
 export type UpdateProfileRequest = {
   name: string;
   email: string;
-  avatar: File | null;
+  avatar: File | undefined;
 }
 
 export type UpdatePasswordRequest = {

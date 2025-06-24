@@ -91,7 +91,7 @@ function RouteBreadcrumb() {
 
         {segments.map((segment, index) => (
           <>
-            <BreadcrumbItem>
+            <BreadcrumbItem key={segment.path}>
               <BreadcrumbLink asChild>
                 <Link href={segment.path}>{segment.displayName}</Link>
               </BreadcrumbLink>

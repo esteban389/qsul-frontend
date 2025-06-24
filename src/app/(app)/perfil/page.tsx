@@ -18,6 +18,7 @@ import ServiceManager from './_components/ServiceManager';
 import { Service } from '@/types/service';
 import useServices from '../servicios/useServices';
 import useRequestProfileChange from './useRequestProfileChange';
+import ErrorText from '@/components/ui/ErrorText';
 
 function Profile() {
   const [tab, setTab] = useQueryState('tab', {
@@ -70,11 +71,12 @@ function PersonalInformation() {
   const { user } = useAuth({ middleware: 'auth' });
   const [email, setEmail] = useState(user?.email || '');
   const [name, setName] = useState(user?.name || '');
-  const [avatar, setAvatar] = useState<File | string>(user?.avatar || '');
+  const [avatar, setAvatar] = useState<File | string | undefined>(user?.avatar || undefined);
+  const [errors, setErrors] = useState<{ avatar?: string; email?: string; name?: string }>();
   const updateMutation = useUpdateProfile({
     email,
     name,
-    avatar: typeof avatar === 'string' ? null : avatar,
+    avatar: typeof avatar === 'string' ? undefined : avatar,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,6 +89,14 @@ function PersonalInformation() {
     });
     if (result.success) {
       updateMutation.mutate();
+    } else {
+      setErrors(result.issues.reduce((acc,issue)=>{
+        const key = issue.path?.[0]?.key as keyof typeof acc;
+        if(key){
+          acc[key] = issue.message;
+        }
+        return acc;
+      }, {} as { avatar?: string; email?: string; name?: string }) ?? {});
     }
   }
   return (
@@ -106,6 +116,7 @@ function PersonalInformation() {
             onChange={(e) => setAvatar(e.target.files?.[0] || '')}
             className="w-full"
           />
+          {errors?.avatar && <ErrorText>{errors.avatar}</ErrorText>}
         </div>
         <div className="text-lg text-gray-700">
           <Label className="block mb-2" htmlFor="name">
@@ -119,6 +130,7 @@ function PersonalInformation() {
             placeholder="Nombre completo"
             className="w-full"
           />
+          {errors?.name && <ErrorText>{errors.name}</ErrorText>}
         </div>
         <div className="text-lg text-gray-700">
           <Label className="block mb-2" htmlFor="email">
@@ -132,6 +144,7 @@ function PersonalInformation() {
             placeholder="Correo electrónico"
             className="w-full"
           />
+          {errors?.email && <ErrorText>{errors.email}</ErrorText>}
         </div>
         <Button className="w-full mt-4" type="submit" disabled={updateMutation.isPending}>
           Actualizar información

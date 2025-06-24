@@ -51,6 +51,7 @@ export default function PerceptionGroupQuestion() {
         </div>
         <QueryRenderer query={query}
           successProps={{ view }}
+          resolveEmpty={(data) => !data || data?.data.length === 0}
           config={{
             pending: () => <div className="size-full flex items-center justify-center"><LoadingContent /></div>,
             error: () => <div className="text-red-500">Error al cargar los datos</div>,
