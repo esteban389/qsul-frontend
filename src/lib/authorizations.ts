@@ -60,6 +60,9 @@ const authorizations: RoleAuthorization = {
   [Role.PROCESS_LEADER]: [
     { entity: 'user', operation: 'read' },
     { entity: 'employee', operation: 'read' },
+    { entity: 'employee', operation: 'create' },
+    { entity: 'employee', operation: 'update' },
+    { entity: 'employee', operation: 'delete' },
     { entity: 'process', operation: 'read' },
     { entity: 'service', operation: 'read' },
   ],
