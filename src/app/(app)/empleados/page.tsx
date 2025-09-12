@@ -60,6 +60,9 @@ import useCreateEmployee from '@/app/(app)/empleados/useCreateEmployee';
 import QueryRenderer from '@/components/QueryRenderer';
 import LoadingContent from '@/components/LoadingContent';
 import { Employee } from '@/types/employee';
+import { Role } from '@/types/user';
+import useAuth from '@/hooks/useAuth';
+import useEmployeeServices from '@/app/(app)/perfil/_components/useEmployeeServices';
 import columns from './TableDefinition';
 import EmployeeDetailsSheet from './EmployeeDetailsSheet';
 
@@ -219,7 +222,7 @@ function EmployeePage() {
                 </Button>
               </CredenzaTrigger>
               <CredenzaContent>
-                <CreateServiceModal />
+                <CreateEmployee />
               </CredenzaContent>
             </Credenza>
           )}
@@ -247,7 +250,7 @@ function EmployeePage() {
             preferCacheOverFetch: false,
             pending: Loading,
             success: EmployeesTable,
-            error: ({ error, retry }) => (
+            error: ({ error, retry }: { error: Error; retry: () => void }) => (
               <motion.div
                 className="text-center"
                 initial={{ opacity: 0 }}
@@ -272,17 +275,32 @@ function EmployeePage() {
   );
 }
 
-function CreateServiceModal() {
+function CreateEmployee() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [avatar, setAvatar] = useState<File | null>(null);
   const [process, setProcess] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  
+  // Get current user info
+  const { user } = useAuth({ middleware: 'auth' });
+  const isProcessLeader = user?.role === Role.PROCESS_LEADER;
+  
+  // Fetch employee data for process leaders to get their process_id
+  const employeeQuery = useEmployeeServices(
+    isProcessLeader && user?.employee_id ? user.employee_id : undefined
+  );
+  
+  // For process leaders, use their own process_id
+  const processId = isProcessLeader && employeeQuery.data?.process_id 
+    ? employeeQuery.data.process_id 
+    : process;
+  
   const { data: processes, isSuccess } = useProcesses({ deleted_at: 'null' });
   const createEmployeeMutation = useCreateEmployee({
     name,
     avatar: avatar as File,
-    process_id: process as number,
+    process_id: processId as number,
     email,
   });
 
@@ -290,7 +308,12 @@ function CreateServiceModal() {
     e.preventDefault();
     const nameResult = safeParse(EmployeeNameSchema, name);
     const iconResult = safeParse(EmployeeAvatarSchema, avatar);
-    const processResult = safeParse(EmployeeProcessSchema, process);
+    
+    // Only validate process if user is not a process leader
+    const processResult = isProcessLeader 
+      ? { success: true as const, issues: null } 
+      : safeParse(EmployeeProcessSchema, process);
+    
     if (nameResult.success && iconResult.success && processResult.success) {
       toast.promise(createEmployeeMutation.mutateAsync(), {
         loading: 'Creando empleado...',
@@ -302,7 +325,7 @@ function CreateServiceModal() {
     setErrors({
       name: nameResult.issues && nameResult.issues[0].message,
       avatar: iconResult.issues && iconResult.issues[0].message,
-      process: processResult.issues && processResult.issues[0].message,
+      process: !isProcessLeader && processResult.issues ? processResult.issues[0].message : undefined,
     });
   };
 
@@ -367,6 +390,89 @@ function CreateServiceModal() {
     });
   };
 
+  // If user is process leader, wait for employee data to load
+  if (isProcessLeader) {
+    return (
+      <QueryRenderer
+        query={employeeQuery}
+        config={{
+          pending: () => (
+            <div className="space-y-4 p-12">
+              <CredenzaTitle className="mb-4">Registrar empleado</CredenzaTitle>
+              <div className="flex justify-center">
+                <LoadingContent />
+              </div>
+            </div>
+          ),
+          error: ({ error }: { error: Error }) => (
+            <div className="space-y-4 p-12">
+              <CredenzaTitle className="mb-4">Registrar empleado</CredenzaTitle>
+              <p className="text-center text-red-500">Error: {error.message}</p>
+            </div>
+          ),
+          success: () => (
+            <CreateEmployeeForm 
+              isProcessLeader={isProcessLeader}
+              processes={processes ?? []}
+              isSuccess={isSuccess}
+              onSubmit={onSubmit}
+              name={name}
+              onNameChange={onNameChange}
+              email={email}
+              onEmailChange={onEmailChange}
+              onAvatarChange={onAvatarChange}
+              onProcessChange={onProcessChange}
+              errors={errors}
+            />
+          ),
+        }}
+      />
+    );
+  }
+
+  // For non-process leaders, render form directly
+  return (
+    <CreateEmployeeForm 
+      isProcessLeader={isProcessLeader}
+      processes={processes ?? []}
+      isSuccess={isSuccess}
+      onSubmit={onSubmit}
+      name={name}
+      onNameChange={onNameChange}
+      email={email}
+      onEmailChange={onEmailChange}
+      onAvatarChange={onAvatarChange}
+      onProcessChange={onProcessChange}
+      errors={errors}
+    />
+  );
+}
+
+function CreateEmployeeForm({ 
+  isProcessLeader, 
+  processes, 
+  isSuccess, 
+  onSubmit, 
+  name, 
+  onNameChange, 
+  email, 
+  onEmailChange, 
+  onAvatarChange, 
+  onProcessChange, 
+  errors 
+}: {
+  isProcessLeader: boolean;
+  processes: any[];
+  isSuccess: boolean;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  name: string;
+  onNameChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  email: string;
+  onEmailChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onAvatarChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onProcessChange: (value: string) => void;
+  errors: Record<string, string | undefined>;
+}) {
   return (
     <form onSubmit={onSubmit} className="space-y-4 p-12">
       <CredenzaTitle className="mb-4">Registrar empleado</CredenzaTitle>
@@ -398,38 +504,40 @@ function CreateServiceModal() {
         <Input name="avatar" type="file" onChange={onAvatarChange} />
         {errors.avatar && <ErrorText>{errors.avatar}</ErrorText>}
       </div>
-      <div>
-        <Select onValueChange={onProcessChange}>
-          <SelectTrigger className="h-fit">
-            <SelectValue placeholder="Seleccionar proceso" />
-          </SelectTrigger>
-          <SelectContent className="max-h-60">
-            <SelectGroup>
-              {isSuccess &&
-                processes.map(process => (
-                  <SelectItem key={process.id} value={String(process.id)}>
-                    <div className="flex flex-row items-center gap-4">
-                      <Avatar>
-                        <AvatarImage
-                          src={
-                            process.icon
-                              ? env('API_URL') + process.icon
-                              : undefined
-                          }
-                        />
-                        <AvatarFallback>
-                          {getInitials(process.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      {process.name}
-                    </div>
-                  </SelectItem>
-                ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        {errors.process && <ErrorText>{errors.process}</ErrorText>}
-      </div>
+      {!isProcessLeader && (
+        <div>
+          <Select onValueChange={onProcessChange}>
+            <SelectTrigger className="h-fit">
+              <SelectValue placeholder="Seleccionar proceso" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              <SelectGroup>
+                {isSuccess &&
+                  processes.map((process: any) => (
+                    <SelectItem key={process.id} value={String(process.id)}>
+                      <div className="flex flex-row items-center gap-4">
+                        <Avatar>
+                          <AvatarImage
+                            src={
+                              process.icon
+                                ? env('API_URL') + process.icon
+                                : undefined
+                            }
+                          />
+                          <AvatarFallback>
+                            {getInitials(process.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        {process.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          {errors.process && <ErrorText>{errors.process}</ErrorText>}
+        </div>
+      )}
       <div className="flex w-full justify-center">
         <Button>Guardar</Button>
       </div>

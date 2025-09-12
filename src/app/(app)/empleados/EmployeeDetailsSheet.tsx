@@ -63,6 +63,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import QRCode from 'qrcode';
+import { Role } from '@/types/user';
+import useAuth from '@/hooks/useAuth';
 
 export default function EmployeeDetailsSheet({
   employee,
@@ -90,6 +92,8 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   const can = useAuthorize();
+  const { user } = useAuth({ middleware: 'auth' });
+  const isProcessLeader = user?.role === Role.PROCESS_LEADER;
   const {
     data: processes,
     isSuccess: isProcessesSuccess,
@@ -113,6 +117,17 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
     const avatarResult = safeParse(OptionalEmployeeAvatarSchema, avatar);
     const nameResult = safeParse(EmployeeNameSchema, name);
     const emailResult = safeParse(EmployeeEmailSchema, email);
+    
+    // For process leaders, ensure they can't change the process
+    if (isProcessLeader && process !== employee.process_id) {
+      setErrors({
+        parent: 'Los líderes de proceso no pueden cambiar el proceso de un empleado',
+      });
+      e.stopPropagation();
+      e.preventDefault();
+      return;
+    }
+    
     if (!avatarResult.success || !nameResult.success || !emailResult.success) {
       setErrors({
         avatar: avatarResult.success
@@ -219,6 +234,10 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
   };
 
   const onProcessChange = (value: string) => {
+    // Prevent process leaders from changing the process
+    if (isProcessLeader) {
+      return;
+    }
     setProcess(Number(value));
     setErrors({
       ...errors,
@@ -292,7 +311,7 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
               <Select
                 name="parent"
                 onValueChange={onProcessChange}
-                disabled={!can('update', 'employee')}
+                disabled={!can('update', 'employee') || isProcessLeader}
                 value={process ? String(process) : undefined}>
                 <SelectTrigger className="h-fit">
                   <SelectValue placeholder="Asociar con un proceso" />
@@ -321,6 +340,11 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              {isProcessLeader && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Los líderes de proceso no pueden cambiar el proceso de un empleado
+                </p>
+              )}
               {errors?.parent && <ErrorText>{errors.parent}</ErrorText>}
             </div>
           )}
