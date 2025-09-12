@@ -1,0 +1,6 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "3000:3000" # or 3000:3000 if SSR
+    restart: unless-stopped

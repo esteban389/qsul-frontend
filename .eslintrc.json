@@ -1,0 +1,83 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:eslint-plugin-next-on-pages/recommended",
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime",
+    "plugin:@next/next/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "airbnb-base",
+    "plugin:tailwindcss/recommended",
+    "airbnb",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": [
+    "eslint-plugin-next-on-pages",
+    "react-refresh",
+    "unused-imports",
+    "tailwindcss",
+    "simple-import-sort"
+  ],
+  "ignorePatterns": [
+    "dist",
+    "vite.config.js",
+    "tailwind.config.js",
+    "/src/components/ui"
+  ],
+  "rules": {
+    "react/no-unstable-nested-components": "off",
+    "react/require-default-props": "off",
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true
+      }
+    ],
+    "camelcase": "off",
+    "react-refresh/only-export-components":"off",
+    "no-use-before-define": "off",
+    "react/no-danger": "off",
+    "@next/next/no-img-element": "off",
+    "tailwindcss/no-custom-classname": "off",
+    "no-empty-pattern": "off",
+    "no-shadow": "off",
+    "react/function-component-definition": "off",
+    "react/destructuring-assignment": "off",
+    "react/jsx-props-no-spreading": "off",
+    "no-unused-vars": "off",
+    "react/react-in-jsx-scope": "off",
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
+    "react/jsx-filename-extension": [
+      1,
+      {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".ts",
+          ".tsx"
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "rules": {
+        "react/prop-types": "off"
+      }
+    }
+  ]
+}
