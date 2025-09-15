@@ -5,6 +5,7 @@ export const EmailSchema = v.pipe(
   v.string(),
   v.nonEmpty('Debes ingresar el correo'),
   v.email('Debes ingresar un correo válido'),
+  v.maxLength(255, 'El correo debe tener menos de 255 caracteres'),
 );
 export const LoginPasswordSchema = v.pipe(
   v.string(),
@@ -26,6 +27,7 @@ export const UserNameSchema = v.pipe(
   v.string(),
   v.nonEmpty('Debes ingresar el nombre'),
   v.minLength(3, 'El nombre debe tener al menos 3 caracteres'),
+  v.maxLength(255, 'El nombre debe tener menos de 255 caracteres'),
 );
 export const UserAvatarSchema = v.pipe(
   v.file('Debes seleccionar una imagen'),

@@ -5,12 +5,14 @@ export const CampusNameSchema = v.pipe(
   v.string(),
   v.nonEmpty('Debes ingresar el nombre'),
   v.minLength(3, 'El nombre debe tener al menos 3 caracteres'),
+  v.maxLength(255, 'El nombre debe tener menos de 255 caracteres'),
 );
 
 export const CampusAddressSchema = v.pipe(
   v.string(),
   v.nonEmpty('Debes ingresar la dirección'),
   v.minLength(3, 'La dirección debe tener al menos 3 caracteres'),
+  v.maxLength(255, 'La dirección debe tener menos de 255 caracteres'),
 );
 
 export const CampusIconSchema = v.pipe(
@@ -32,6 +34,7 @@ export const ProcessNameSchema = v.pipe(
   v.string(),
   v.nonEmpty('Debes ingresar el nombre'),
   v.minLength(3, 'El nombre debe tener al menos 3 caracteres'),
+  v.maxLength(255, 'El nombre debe tener menos de 255 caracteres'),
 );
 
 export const ProcessIconSchema = v.pipe(
@@ -53,6 +56,7 @@ export const ServiceNameSchema = v.pipe(
   v.string(),
   v.nonEmpty('Debes ingresar el nombre'),
   v.minLength(3, 'El nombre debe tener al menos 3 caracteres'),
+  v.maxLength(255, 'El nombre debe tener menos de 255 caracteres'),
 );
 
 export const ServiceIconSchema = v.pipe(
@@ -76,12 +80,14 @@ export const EmployeeNameSchema = v.pipe(
   v.string(),
   v.nonEmpty('Debes ingresar el nombre'),
   v.minLength(3, 'El nombre debe tener al menos 3 caracteres'),
+  v.maxLength(255, 'El nombre debe tener menos de 255 caracteres'),
 );
 
 export const EmployeeEmailSchema = v.pipe(
   v.string(),
   v.nonEmpty('Debes ingresar el correo'),
   v.email('Debes ingresar un correo válido'),
+  v.maxLength(255, 'El correo debe tener menos de 255 caracteres'),
 );
 
 export const EmployeeAvatarSchema = v.pipe(
