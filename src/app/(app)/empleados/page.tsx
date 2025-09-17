@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useMemo, useState } from 'react';
 import {
   ColumnFiltersState,
   flexRender,
@@ -284,7 +284,7 @@ function CreateEmployee() {
   
   // Get current user info
   const { user } = useAuth({ middleware: 'auth' });
-  const isProcessLeader = user?.role === Role.PROCESS_LEADER;
+  const isProcessLeader = useMemo(() => user?.role === Role.PROCESS_LEADER, [user]);
   
   // Fetch employee data for process leaders to get their process_id
   const employeeQuery = useEmployeeServices(
@@ -292,9 +292,9 @@ function CreateEmployee() {
   );
   
   // For process leaders, use their own process_id
-  const processId = isProcessLeader && employeeQuery.data?.process_id 
+  const processId = useMemo(() => isProcessLeader && employeeQuery.data?.process_id 
     ? employeeQuery.data.process_id 
-    : process;
+    : process, [isProcessLeader, employeeQuery.data?.process_id, process]);
   
   const { data: processes, isSuccess } = useProcesses({ deleted_at: 'null' });
   const createEmployeeMutation = useCreateEmployee({
