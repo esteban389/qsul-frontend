@@ -590,9 +590,17 @@ function QRCodeView({
       </div>
     );
   }
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(String(url));
+    toast.info('Código QR copiado al portapapeles');
+  };
   return (
     <div className="flex flex-col items-center justify-center space-y-4">
       <img src={dataUrl} alt="QR Code" />
+      <Button onClick={() => copyToClipboard()}>
+        Copiar
+      </Button>
       <Button onClick={() => downloadURI(dataUrl, `Código QR ${employeeName}`)}>
         Descargar
       </Button>
