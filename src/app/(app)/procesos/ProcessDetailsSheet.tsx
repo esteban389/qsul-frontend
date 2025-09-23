@@ -6,8 +6,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { ChangeEvent, ReactNode, useState } from 'react';
-import { getInitials } from '@/lib/utils';
+import { ChangeEvent, ReactNode, useEffect, useState } from 'react';
+import { downloadURI, getInitials } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import env from '@/lib/env';
 import { Input } from '@/components/ui/input';
@@ -50,6 +50,12 @@ import {
 import useProcesses from '@/app/(app)/procesos/useProcesses';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import useAuth from '@/hooks/useAuth';
+import QRCode from 'qrcode';
+import { Role } from '@/types/user';
+import { Dialog, DialogContent, DialogDescription, DialogTrigger, DialogTitle } from '@/components/ui/dialog';
+import useProcessUrl from './useProcessUrl';
+import { LoaderCircle } from 'lucide-react';
 
 export default function ProcessDetailsSheet({
   process,
@@ -191,6 +197,8 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
     });
   };
 
+  const { data: url } = useProcessUrl(process.id);
+
   return (
     <>
       <SheetTitle>Detalles: {process.name}</SheetTitle>
@@ -210,6 +218,7 @@ function ProcessSheetContent({ process }: Readonly<{ process: Process }>) {
                 {errors?.icon && <ErrorText>{errors.icon}</ErrorText>}
               </div>
             )}
+            <QRCodeButton url={url?.url} processName={process.name} />
           </div>
           <div>
             <Label htmlFor="name">Nombre</Label>
@@ -381,5 +390,74 @@ function DeleteProcessAlert({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+function QRCodeButton({
+  url,
+  processName,
+}: Readonly<{
+  url: string | undefined;
+  processName: string;
+}>) {
+  const { user } = useAuth({ middleware: 'auth' });
+  const canSeeQRCode = user?.role === Role.CAMPUS_COORDINATOR;
+  if (!canSeeQRCode) {
+    return null;
+  }
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>Código QR de Encuesta</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogTitle>Código QR de Encuesta</DialogTitle>
+        <DialogDescription className="sr-only">
+          Código QR para la encuesta de {processName}
+        </DialogDescription>
+        <QRCodeView url={url} name={processName} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function QRCodeView({
+  url,
+  name,
+}: Readonly<{
+  url: string | undefined;
+  name: string;
+}>) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const toDataUrl = async () => {
+      const result = await QRCode.toDataURL(url);
+      setDataUrl(result);
+    };
+    if (url) {
+      toDataUrl();
+    }
+  }, [url]);
+  if (!dataUrl) {
+    return (
+      <div className="flex h-48 w-full items-center justify-center">
+        <LoaderCircle className="size-12 animate-spin" />
+      </div>
+    );
+  }
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(String(url));
+    toast.info('Código QR copiado al portapapeles');
+  };
+  return (
+    <div className="flex flex-col items-center justify-center space-y-4">
+      <img src={dataUrl || ''} alt="QR Code" />
+      <Button onClick={() => copyToClipboard()}>
+        Copiar
+      </Button>
+      <Button onClick={() => downloadURI(dataUrl || '', `Código QR ${name}`)}>
+        Descargar
+      </Button>
+    </div>
   );
 }
