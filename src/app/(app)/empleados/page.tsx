@@ -392,6 +392,21 @@ function CreateEmployee() {
 
   // If user is process leader, wait for employee data to load
   if (isProcessLeader) {
+	  if(employeeQuery.isSuccess) {
+		  return <CreateEmployeeForm 
+              isProcessLeader={isProcessLeader}
+              processes={processes ?? []}
+              isSuccess={isSuccess}
+              onSubmit={onSubmit}
+              name={name}
+              onNameChange={onNameChange}
+              email={email}
+              onEmailChange={onEmailChange}
+              onAvatarChange={onAvatarChange}
+              onProcessChange={onProcessChange}
+              errors={errors}
+            />
+	  }
     return (
       <QueryRenderer
         query={employeeQuery}
