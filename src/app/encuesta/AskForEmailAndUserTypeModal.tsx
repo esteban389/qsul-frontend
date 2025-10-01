@@ -112,9 +112,9 @@ export default function AskForEmailAndUserTypeModal() {
         </Tooltip>
       </TooltipProvider>
       <DialogContent>
-        <DialogTitle>Información del encuestante</DialogTitle>
+        <DialogTitle>Información del usuario</DialogTitle>
         <DialogDescription>
-          Ingresa tu correo electrónico y el tipo de usuario
+          Ingresa tu correo electrónico y el tipo de usuario que eres
         </DialogDescription>
         <div>
           <Label>Correo electrónico</Label>
