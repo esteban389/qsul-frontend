@@ -38,23 +38,36 @@ function OfficeQRCode() {
   }
 
   const { data: url } = useOfficeUrl();
+  const isCampusCoordinator = user?.role === Role.CAMPUS_COORDINATOR;
+  const title = isCampusCoordinator ? "Código QR de la seccional" : "Código QR de la oficina";
+  const description = isCampusCoordinator 
+    ? "Comparte este código QR para acceder a la encuesta de tu seccional"
+    : "Comparte este código QR para acceder a la encuesta de tu oficina";
+
   return (
     <Card className="w-full lg:w-80 xl:w-96">
       <CardHeader>
-        <CardTitle>Código QR de la oficina</CardTitle>
+        <CardTitle>{title}</CardTitle>
         <CardDescription>
-          Comparte este código QR para acceder a la encuesta de tu oficina
+          {description}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <OfficeQRCodeContent url={url?.url} />
+        <OfficeQRCodeContent url={url?.url} isCampusCoordinator={isCampusCoordinator} />
       </CardContent>
     </Card>
   );
 }
 
-function OfficeQRCodeContent({ url }: { url: string | undefined }) {
+function OfficeQRCodeContent({ url, isCampusCoordinator }: { url: string | undefined; isCampusCoordinator: boolean }) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
+
+  // Check if clipboard API is available
+  const isClipboardAvailable = 
+    typeof navigator !== 'undefined' && 
+    'clipboard' in navigator && 
+    typeof navigator.clipboard.writeText === 'function';
+
   useEffect(() => {
     const toDataUrl = async () => {
       const result = await QRCode.toDataURL(url, {
@@ -86,25 +99,48 @@ function OfficeQRCodeContent({ url }: { url: string | undefined }) {
   };
 
   const downloadQR = () => {
-    downloadURI(dataUrl, 'codigo-qr-oficina.png');
+    const filename = isCampusCoordinator ? 'codigo-qr-seccional.png' : 'codigo-qr-oficina.png';
+    downloadURI(dataUrl, filename);
     toast.success('Código QR descargado');
   };
+
+  const altText = isCampusCoordinator ? "Código QR de la seccional" : "Código QR de la oficina";
 
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="flex items-center justify-center p-4 bg-white rounded-lg border">
-        <img src={dataUrl} alt="Código QR de la oficina" className="w-48 h-48" />
+        <img src={dataUrl} alt={altText} className="w-48 h-48" />
       </div>
-      <div className="flex flex-col w-full gap-2 sm:flex-row">
-        <Button onClick={copyToClipboard} variant="outline" className="flex-1">
-          <Copy className="mr-2 h-4 w-4" />
-          Copiar URL
-        </Button>
-        <Button onClick={downloadQR} className="flex-1">
-          <Download className="mr-2 h-4 w-4" />
-          Descargar
-        </Button>
-      </div>
+      
+      {isClipboardAvailable ? (
+        <div className="flex flex-col w-full gap-2 sm:flex-row">
+          <Button onClick={copyToClipboard} variant="outline" className="flex-1">
+            <Copy className="mr-2 h-4 w-4" />
+            Copiar URL
+          </Button>
+          <Button onClick={downloadQR} className="flex-1">
+            <Download className="mr-2 h-4 w-4" />
+            Descargar
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-col w-full gap-2">
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground text-center">
+              Selecciona y copia la URL manualmente:
+            </p>
+            <div className="p-2 bg-muted rounded border">
+              <p className="text-sm font-mono select-all break-all text-center">
+                {url}
+              </p>
+            </div>
+          </div>
+          <Button onClick={downloadQR} className="w-full">
+            <Download className="mr-2 h-4 w-4" />
+            Descargar
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -573,9 +573,23 @@ function QRCodeView({
   employeeName,
 }: Readonly<{ url: string | undefined; employeeName: string }>) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
+
+  // Check if clipboard API is available
+  const isClipboardAvailable = 
+    typeof navigator !== 'undefined' && 
+    'clipboard' in navigator && 
+    typeof navigator.clipboard.writeText === 'function';
+
   useEffect(() => {
     const toDataUrl = async () => {
-      const result = await QRCode.toDataURL(url);
+      const result = await QRCode.toDataURL(url, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
       setDataUrl(result);
     };
     if (url) {
@@ -593,17 +607,41 @@ function QRCodeView({
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(String(url));
-    toast.info('Código QR copiado al portapapeles');
+    toast.info('URL copiada al portapapeles');
   };
+
   return (
     <div className="flex flex-col items-center justify-center space-y-4">
-      <img src={dataUrl} alt="QR Code" />
-      <Button onClick={() => copyToClipboard()}>
-        Copiar
-      </Button>
-      <Button onClick={() => downloadURI(dataUrl, `Código QR ${employeeName}`)}>
-        Descargar
-      </Button>
+      <div className="flex items-center justify-center p-4 bg-white rounded-lg border">
+        <img src={dataUrl} alt={`Código QR para ${employeeName}`} className="w-48 h-48" />
+      </div>
+      
+      {isClipboardAvailable ? (
+        <div className="flex flex-col w-full gap-2 sm:flex-row">
+          <Button onClick={copyToClipboard} variant="outline" className="flex-1">
+            Copiar URL
+          </Button>
+          <Button onClick={() => downloadURI(dataUrl, `Código QR ${employeeName}`)} className="flex-1">
+            Descargar
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-col w-full gap-2">
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground text-center">
+              Selecciona y copia la URL manualmente:
+            </p>
+            <div className="p-2 bg-muted rounded border">
+              <p className="text-sm font-mono select-all break-all text-center">
+                {url}
+              </p>
+            </div>
+          </div>
+          <Button onClick={() => downloadURI(dataUrl, `Código QR ${employeeName}`)} className="w-full">
+            Descargar
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
