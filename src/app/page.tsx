@@ -4,11 +4,12 @@ import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 import { ChangeEvent, FormEvent, useState } from 'react';
 import useAuth from '@/hooks/useAuth';
 import { useMutation } from '@tanstack/react-query';
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, AlertTriangle } from 'lucide-react';
 import { ValidationErrors } from '@/types/ValidationResult';
 import { safeParse } from 'valibot';
 import ErrorText from '@/components/ui/ErrorText';
@@ -19,6 +20,11 @@ import {
   LoginPasswordSchema,
 } from '@/Schemas/AuthenticationSchemas';
 
+interface ConfigurationError {
+  error: string;
+  message: string;
+}
+
 export default function Home() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,6 +33,7 @@ export default function Home() {
     password: undefined,
   });
   const [serverError, setServerError] = useState<string | undefined>(undefined);
+  const [configurationError, setConfigurationError] = useState<ConfigurationError | undefined>(undefined);
   const { login } = useAuth({
     middleware: 'guest',
     redirectIfAuthenticated: '/inicio',
@@ -37,8 +44,21 @@ export default function Home() {
     onError: error => {
       if (error instanceof AxiosError) {
         const body = error.response?.data;
-        if (body && 'message' in body) {
+        if (body && 'error' in body && 'message' in body) {
+          // Check if it's a configuration error
+          if (body.error && body.error.includes('cuenta no está completamente configurada')) {
+            setConfigurationError({
+              error: body.error,
+              message: body.message
+            });
+            setServerError(undefined);
+          } else {
+            setServerError(body.message);
+            setConfigurationError(undefined);
+          }
+        } else if (body && 'message' in body) {
           setServerError(body.message);
+          setConfigurationError(undefined);
         } else {
           toast.error(`Ocurrió un error inesperado: ${error.message}`);
         }
@@ -49,6 +69,7 @@ export default function Home() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setServerError(undefined);
+    setConfigurationError(undefined);
     const { issues: emailIssues, success: emailSuccess } = safeParse(
       EmailSchema,
       email,
@@ -71,6 +92,7 @@ export default function Home() {
     const { value } = e.target;
     setEmail(value);
     setServerError(undefined);
+    setConfigurationError(undefined);
     const { issues, success } = safeParse(EmailSchema, value);
     if (success) {
       setErrors({
@@ -90,6 +112,7 @@ export default function Home() {
     const { value } = e.target;
     setPassword(value);
     setServerError(undefined);
+    setConfigurationError(undefined);
     const { issues, success } = safeParse(LoginPasswordSchema, value);
     if (success) {
       setErrors({
@@ -117,6 +140,31 @@ export default function Home() {
               Escribe tu correo y contraseña para ingresar
             </h2>
           </div>
+          
+          {configurationError && (
+            <Alert variant="destructive" className="border-2 border-red-500 bg-red-50">
+              <AlertTriangle className="h-5 w-5" />
+              <AlertTitle className="text-lg font-bold mb-2">
+                {configurationError.error}
+              </AlertTitle>
+              <AlertDescription className="text-base">
+                <p className="mb-3">{configurationError.message}</p>
+                <p className="text-sm font-medium">
+                  <strong>¿Qué significa esto?</strong>
+                </p>
+                <p className="text-sm mb-3">
+                  Tu cuenta ha sido creada exitosamente, pero necesita ser configurada completamente por un administrador antes de que puedas acceder al sistema.
+                </p>
+                <p className="text-sm font-medium">
+                  <strong>¿Qué debes hacer?</strong>
+                </p>
+                <p className="text-sm">
+                  Contacta al administrador del sistema para que complete la configuración de tu cuenta asignándote el proceso o seccional correspondiente.
+                </p>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {serverError && <ErrorText>{serverError}</ErrorText>}
           <form onSubmit={handleSubmit} className="mt-2 space-y-4">
             <div>
