@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
 import useAuth from '@/hooks/useAuth';
 import { useMutation } from '@tanstack/react-query';
 import { LoaderCircle, AlertTriangle } from 'lucide-react';
@@ -38,6 +38,17 @@ export default function Home() {
     middleware: 'guest',
     redirectIfAuthenticated: '/inicio',
   });
+
+  // Auto-dismiss configuration error after 8 seconds
+  useEffect(() => {
+    if (configurationError) {
+      const timer = setTimeout(() => {
+        setConfigurationError(undefined);
+      }, 8000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [configurationError]);
 
   const loginMut = useMutation({
     mutationFn: () => login(email, password),
@@ -153,13 +164,13 @@ export default function Home() {
                   <strong>¿Qué significa esto?</strong>
                 </p>
                 <p className="text-sm mb-3">
-                  Tu cuenta ha sido creada exitosamente, pero necesita ser configurada completamente por un administrador antes de que puedas acceder al sistema.
+                  Tu cuenta ha sido creada exitosamente, pero necesita ser configurada completamente por el coordinador nacional o seccional antes de que puedas acceder al sistema.
                 </p>
                 <p className="text-sm font-medium">
                   <strong>¿Qué debes hacer?</strong>
                 </p>
                 <p className="text-sm">
-                  Contacta al administrador del sistema para que complete la configuración de tu cuenta asignándote el proceso o seccional correspondiente.
+                  Contacta al coordinador nacional o seccional para que complete la configuración de tu cuenta asignándote el proceso o seccional correspondiente.
                 </p>
               </AlertDescription>
             </Alert>
