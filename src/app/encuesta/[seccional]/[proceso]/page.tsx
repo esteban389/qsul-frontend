@@ -21,7 +21,7 @@ export default async function page({
   }
   const employees = (
     await backendClient.get<Employee[]>(
-      `/api/employees?filter[process.token]=${pathParams.proceso}`,
+      `/api/employees?filter[process.token]=${pathParams.proceso}&filter[campus.token]=${pathParams.seccional}`,
     )
   ).data;
 
