@@ -194,7 +194,9 @@ function AnswersPage() {
     state: {
       sorting,
       columnVisibility: {
-        email: user?.role === Role.NATIONAL_COORDINATOR,
+        email:
+          user?.role === Role.NATIONAL_COORDINATOR ||
+          user?.role === Role.CAMPUS_COORDINATOR,
       },
     },
   });
