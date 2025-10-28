@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/types/user';
+import { cleanupStorage } from '@/app/(app)/reporte/context/storage';
 
 interface UseAuthProps {
   middleware?: 'guest' | 'auth';
@@ -46,6 +47,7 @@ export default function useAuth({
       await backendClient.post('/logout');
     } finally {
       queryClient.clear();
+      cleanupStorage();
       router.push('/');
     }
   }, [queryClient, router]);

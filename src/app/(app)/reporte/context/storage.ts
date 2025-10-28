@@ -65,6 +65,12 @@ const deserializeState = (storedState: string | null): Partial<State> => {
   }
 };
 
+export const cleanupStorage = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+};
+
 const createReportStore: () => StateActions & StoreActions = () => {
   // Initial default state
   const initialState: State = {

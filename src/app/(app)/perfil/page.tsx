@@ -19,6 +19,7 @@ import { Service } from '@/types/service';
 import useServices from '../servicios/useServices';
 import useRequestProfileChange from './useRequestProfileChange';
 import ErrorText from '@/components/ui/ErrorText';
+import { Loader2 } from 'lucide-react';
 
 function Profile() {
   const [tab, setTab] = useQueryState('tab', {
@@ -203,7 +204,10 @@ function ChangePassword() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        <Button disabled={mutation.isPending} className="w-full mt-2">Actualizar contraseña</Button>
+        <Button disabled={mutation.isPending} className="w-full mt-2 space-x-2">
+          {mutation.isPending && <Loader2 className="size-4 animate-spin" />}
+          Actualizar contraseña
+        </Button>
       </form>
     </section>
   )
