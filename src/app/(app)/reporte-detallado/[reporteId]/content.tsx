@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Clock, User, AlertCircle, Mail, Trash2 } from 'lucide-react';
+import { Clock, User, AlertCircle, Mail } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
 import { formatDate } from '@/lib/utils';
@@ -29,6 +29,13 @@ export default function Content({ data }: { data: Required<Answer> }) {
       );
     });
   }, [data]);
+
+  const canSolveOrIgnore = useMemo(() => {
+    return (
+      user?.role === Role.NATIONAL_COORDINATOR ||
+      user?.role === Role.CAMPUS_COORDINATOR
+    );
+  }, [user]);
   return (
     <div className="space-y-6 p-4">
       <Card>
@@ -52,7 +59,7 @@ export default function Content({ data }: { data: Required<Answer> }) {
               {data.employee_service.employee.name[0]}
             </AvatarFallback>
           </Avatar>
-          <div className=" size-full flex-1 text-center md:text-left flex flex-col md:flex-row items-center gap-2 justify-between">
+          <div className="flex size-full flex-1 flex-col items-center justify-between gap-2 text-center md:flex-row md:text-left">
             <div>
               <CardTitle className="text-2xl font-bold">
                 {data.employee_service.employee.name}
@@ -64,16 +71,20 @@ export default function Content({ data }: { data: Required<Answer> }) {
                 {data.employee_service.service.name}
               </CardDescription>
             </div>
-            <div className='flex items-center gap-2'>
-              {data.solved_at ? (
-                <p className="text-sm text-green-600">Resuelto: {formatDate(data.solved_at)}</p>
-              ) : (
-                <>
-                  <IgnoreButton answer={data} />
-                  <SolveButton answer={data} />
-                </>
-              )}
-            </div>
+            {canSolveOrIgnore && (
+              <div className="flex items-center gap-2">
+                {data.solved_at ? (
+                  <p className="text-sm text-green-600">
+                    Resuelto: {formatDate(data.solved_at)}
+                  </p>
+                ) : (
+                  <>
+                    <IgnoreButton answer={data} />
+                    <SolveButton answer={data} />
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </CardHeader>
       </Card>
