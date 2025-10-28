@@ -32,6 +32,7 @@ type StateActions = {
   selectEmployee: (employee: number) => void;
   clearFilters: () => void;
   setDefaultState: (getDef: (oldDefault: State) => State) => void;
+  cleanupState: () => void;
 }
 
 type StoreActions = {
@@ -68,6 +69,7 @@ const deserializeState = (storedState: string | null): Partial<State> => {
 export const cleanupStorage = () => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(STORAGE_KEY);
+    store.cleanupState();
   }
 };
 
@@ -112,7 +114,6 @@ const createReportStore: () => StateActions & StoreActions = () => {
 
   // Function to update state and notify listeners
   const updateState = (newState: Partial<State>) => {
-    console.log(newState, state)
     state = { ...state, ...newState };
     listeners.forEach(listener => listener());
     saveToStorage(state);
@@ -189,6 +190,9 @@ const createReportStore: () => StateActions & StoreActions = () => {
         time_frame: state.time_frame,
       }
     },
+    cleanupState: () => {
+      updateState(defaultState);
+    }
   }
 }
 
