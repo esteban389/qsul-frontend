@@ -57,10 +57,10 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --badge-red-text: #e1001d;
-    --badge-red-background: #250005;
-    --badge-green-text: #00ca51;
-    --badge-green-background: #003314;
+    --badge-red-text: #7f1d1d;
+    --badge-red-background: #fee2e2;
+    --badge-green-text: #14532d;
+    --badge-green-background: #dcfce7;
   }
 
   .dark {
@@ -96,6 +96,10 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --badge-red-text: #fef2f2;
+    --badge-red-background: #7f1d1d;
+    --badge-green-text: #f0fdf4;
+    --badge-green-background: #14532d;
   }
 }
 .animateUp {
