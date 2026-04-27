@@ -48,12 +48,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Employee } from '@/types/employee';
 import { Check, CirclePlus, CircleX, LoaderCircle, X } from 'lucide-react';
 import { Service } from '@/types/service';
-import useUpdateService from './useUpdateEmployee';
-import useDeleteEmployee from './useDeleteEmployee';
-import useRestoreEmployee from './useRestoreEmployee';
-import useServices from '../servicios/useServices';
-import useAddServiceToEmployee from './useAddServiceToEmployee';
-import useRemoveServiceToEmployee from './useRemoveServiceToEmployee';
 import useEmployeeUrl from '@/app/(app)/empleados/useEmployeeUrl';
 import {
   Dialog,
@@ -65,6 +59,12 @@ import {
 import QRCode from 'qrcode';
 import { Role } from '@/types/user';
 import useAuth from '@/hooks/useAuth';
+import useUpdateService from './useUpdateEmployee';
+import useDeleteEmployee from './useDeleteEmployee';
+import useRestoreEmployee from './useRestoreEmployee';
+import useServices from '../servicios/useServices';
+import useAddServiceToEmployee from './useAddServiceToEmployee';
+import useRemoveServiceToEmployee from './useRemoveServiceToEmployee';
 
 export default function EmployeeDetailsSheet({
   employee,
@@ -117,17 +117,18 @@ function EmployeeSheetContent({ employee }: Readonly<{ employee: Employee }>) {
     const avatarResult = safeParse(OptionalEmployeeAvatarSchema, avatar);
     const nameResult = safeParse(EmployeeNameSchema, name);
     const emailResult = safeParse(EmployeeEmailSchema, email);
-    
+
     // For process leaders, ensure they can't change the process
     if (isProcessLeader && process !== employee.process_id) {
       setErrors({
-        parent: 'Los líderes de proceso no pueden cambiar el proceso de un empleado',
+        parent:
+          'Los líderes de proceso no pueden cambiar el proceso de un empleado',
       });
       e.stopPropagation();
       e.preventDefault();
       return;
     }
-    
+
     if (!avatarResult.success || !nameResult.success || !emailResult.success) {
       setErrors({
         avatar: avatarResult.success
@@ -468,65 +469,72 @@ function Services({
           ))}
         </ul>
       )}
-      {can('update', 'employee') && addingService ? (
-        <div className="mt-4 flex h-fit w-full flex-col md:flex-row">
-          {isPending && <Skeleton className="h-4 w-24" />}
-          {isSuccess && allServices && (
-            <>
-              <Select
-                onValueChange={value => setSelectedService(Number(value))}>
-                <SelectTrigger className="h-fit max-w-[60%]">
-                  <SelectValue placeholder="Seleccionar servicio" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60">
-                  <SelectGroup>
-                    {allServices.map(service => (
-                      <SelectItem key={service.id} value={String(service.id)}>
-                        <div className="flex flex-row items-center gap-4 truncate">
-                          <Avatar>
-                            <AvatarImage
-                              src={
-                                service.icon
-                                  ? env('API_URL') + service.icon
-                                  : undefined
-                              }
-                            />
-                            <AvatarFallback>
-                              {getInitials(service.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          {service.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <div className="mt-4 flex w-full flex-row items-center justify-center gap-2 md:mt-0">
-                <Button
-                  variant="default"
-                  className="bg-emerald-600 hover:bg-emerald-800"
-                  onClick={() => onAddService()}>
-                  <Check />
-                </Button>
-                <Button
-                  variant="default"
-                  className="bg-red-600 hover:bg-red-800"
-                  onClick={() => setAddingService(false)}>
-                  <X />
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-      ) : (
-        <Button
-          variant="ghost"
-          className="mt-4 w-full"
-          onClick={() => setAddingService(true)}>
-          <CirclePlus /> Agregar servicio
-        </Button>
-      )}
+      {can('update', 'employee') &&
+        (addingService ? (
+          <div className="mt-4 flex h-fit w-full flex-col gap-2 md:flex-row md:items-start">
+            {isPending && <Skeleton className="h-4 w-24" />}
+            {isSuccess && allServices && (
+              <>
+                <div className="min-w-0 flex-1">
+                  <Select
+                    onValueChange={value => setSelectedService(Number(value))}>
+                    <SelectTrigger className="h-fit w-full min-w-0">
+                      <SelectValue placeholder="Seleccionar servicio" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 max-w-[calc(100vw-2rem)]">
+                      <SelectGroup>
+                        {allServices.map(service => (
+                          <SelectItem
+                            key={service.id}
+                            value={String(service.id)}>
+                            <div className="flex min-w-0 items-start gap-4">
+                              <Avatar className="shrink-0">
+                                <AvatarImage
+                                  src={
+                                    service.icon
+                                      ? env('API_URL') + service.icon
+                                      : undefined
+                                  }
+                                />
+                                <AvatarFallback>
+                                  {getInitials(service.name)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="min-w-0 flex-1 break-words leading-snug">
+                                {service.name}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex w-full flex-row items-center justify-center gap-2 md:w-auto md:shrink-0">
+                  <Button
+                    variant="default"
+                    className="bg-emerald-600 hover:bg-emerald-800"
+                    onClick={() => onAddService()}>
+                    <Check />
+                  </Button>
+                  <Button
+                    variant="default"
+                    className="bg-red-600 hover:bg-red-800"
+                    onClick={() => setAddingService(false)}>
+                    <X />
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <Button
+            variant="ghost"
+            className="mt-4 w-full"
+            onClick={() => setAddingService(true)}>
+            <CirclePlus /> Agregar servicio
+          </Button>
+        ))}
     </div>
   );
 }
