@@ -27,6 +27,7 @@ import ErrorText from '@/components/ui/ErrorText';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import usePersistentTablePagination from '@/hooks/usePersistentTablePagination';
 import {
   Table,
   TableBody,
@@ -51,18 +52,22 @@ function CampusPage() {
   const campusesQuery = useCampuses();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const tablePagination = usePersistentTablePagination();
   const table = useReactTable({
     data: campusesQuery.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: tablePagination.onPaginationChange,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: tablePagination.autoResetPageIndex,
     state: {
       sorting,
       columnFilters,
+      pagination: tablePagination.pagination,
     },
   });
   const can = useAuthorize();

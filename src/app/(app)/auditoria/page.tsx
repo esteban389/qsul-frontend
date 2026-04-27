@@ -20,6 +20,7 @@ import QueryRenderer from '@/components/QueryRenderer';
 import LoadingContent from '@/components/LoadingContent';
 import { Audit } from '@/types/audit';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import usePersistentTablePagination from '@/hooks/usePersistentTablePagination';
 import {
   Table,
   TableBody,
@@ -51,21 +52,24 @@ export default function Page() {
   const auditsQuery = useAudit();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const tablePagination = usePersistentTablePagination();
   const table = useReactTable({
     data: auditsQuery.data || [],
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: tablePagination.onPaginationChange,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: tablePagination.autoResetPageIndex,
     state: {
       sorting,
       columnFilters,
+      pagination: tablePagination.pagination,
     },
     columns,
   });
-  console.log(table.getColumn('event')?.getFilterValue());
 
   return (
     <motion.main

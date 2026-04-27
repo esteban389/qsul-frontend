@@ -52,6 +52,7 @@ import {
 import { SelectValue } from '@radix-ui/react-select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import env from '@/lib/env';
+import usePersistentTablePagination from '@/hooks/usePersistentTablePagination';
 import ProcessDetailsSheet from '@/app/(app)/procesos/ProcessDetailsSheet';
 import useProcesses from './useProcesses';
 import columns from './TableDefinition';
@@ -60,18 +61,22 @@ function CampusPage() {
   const processesQuery = useProcesses();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const tablePagination = usePersistentTablePagination();
   const table = useReactTable({
     data: processesQuery.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: tablePagination.onPaginationChange,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: tablePagination.autoResetPageIndex,
     state: {
       sorting,
       columnFilters,
+      pagination: tablePagination.pagination,
     },
   });
   const can = useAuthorize();

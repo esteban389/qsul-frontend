@@ -57,6 +57,7 @@ import { Rabbit, Search } from 'lucide-react';
 import useCampuses from '@/app/(app)/seccionales/useCampuses';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import env from '@/lib/env';
+import usePersistentTablePagination from '@/hooks/usePersistentTablePagination';
 import useUsers from './useUsers';
 import columns from './TableDefinition';
 
@@ -64,18 +65,22 @@ function UsersPage() {
   const usersQuery = useUsers({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const tablePagination = usePersistentTablePagination();
   const table = useReactTable({
     data: usersQuery.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: tablePagination.onPaginationChange,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: tablePagination.autoResetPageIndex,
     state: {
       sorting,
       columnFilters,
+      pagination: tablePagination.pagination,
     },
   });
   const can = useAuthorize();

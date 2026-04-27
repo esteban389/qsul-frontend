@@ -60,8 +60,10 @@ import useCreateEmployee from '@/app/(app)/empleados/useCreateEmployee';
 import QueryRenderer from '@/components/QueryRenderer';
 import LoadingContent from '@/components/LoadingContent';
 import { Employee } from '@/types/employee';
+import type { Process } from '@/types/process';
 import { Role } from '@/types/user';
 import useAuth from '@/hooks/useAuth';
+import usePersistentTablePagination from '@/hooks/usePersistentTablePagination';
 import useEmployeeServices from '@/app/(app)/perfil/_components/useEmployeeServices';
 import columns from './TableDefinition';
 import EmployeeDetailsSheet from './EmployeeDetailsSheet';
@@ -100,6 +102,36 @@ function Loading() {
   return (
     <div className="flex size-full items-center justify-center">
       <LoadingContent />
+    </div>
+  );
+}
+
+function EmployeeListError({
+  error,
+  retry,
+}: {
+  error: Error;
+  retry: () => void;
+}) {
+  return (
+    <motion.div
+      className="text-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}>
+      <p>Error: {error.message}</p>
+      <Button onClick={retry} className="transition-transform hover:scale-105">
+        Retry
+      </Button>
+    </motion.div>
+  );
+}
+
+function CreateEmployeeModalError({ error }: { error: Error }) {
+  return (
+    <div className="space-y-4 p-12">
+      <CredenzaTitle className="mb-4">Registrar empleado</CredenzaTitle>
+      <p className="text-center text-red-500">Error: {error.message}</p>
     </div>
   );
 }
@@ -176,18 +208,22 @@ function EmployeePage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const can = useAuthorize();
+  const tablePagination = usePersistentTablePagination();
   const table = useReactTable({
     data: employeesQuery.data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: tablePagination.onPaginationChange,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: tablePagination.autoResetPageIndex,
     state: {
       sorting,
       columnFilters,
+      pagination: tablePagination.pagination,
     },
   });
 
@@ -250,20 +286,7 @@ function EmployeePage() {
             preferCacheOverFetch: false,
             pending: Loading,
             success: EmployeesTable,
-            error: ({ error, retry }: { error: Error; retry: () => void }) => (
-              <motion.div
-                className="text-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}>
-                <p>Error: {error.message}</p>
-                <Button
-                  onClick={retry}
-                  className="transition-transform hover:scale-105">
-                  Retry
-                </Button>
-              </motion.div>
-            ),
+            error: EmployeeListError,
             empty: EmptyContent,
           }}
           successProps={{
@@ -281,21 +304,28 @@ function CreateEmployee() {
   const [avatar, setAvatar] = useState<File | null>(null);
   const [process, setProcess] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
-  
+
   // Get current user info
   const { user } = useAuth({ middleware: 'auth' });
-  const isProcessLeader = useMemo(() => user?.role === Role.PROCESS_LEADER, [user]);
-  
+  const isProcessLeader = useMemo(
+    () => user?.role === Role.PROCESS_LEADER,
+    [user],
+  );
+
   // Fetch employee data for process leaders to get their process_id
   const employeeQuery = useEmployeeServices(
-    isProcessLeader && user?.employee_id ? user.employee_id : undefined
+    isProcessLeader && user?.employee_id ? user.employee_id : undefined,
   );
-  
+
   // For process leaders, use their own process_id
-  const processId = useMemo(() => isProcessLeader && employeeQuery.data?.process_id 
-    ? employeeQuery.data.process_id 
-    : process, [isProcessLeader, employeeQuery.data?.process_id, process]);
-  
+  const processId = useMemo(
+    () =>
+      isProcessLeader && employeeQuery.data?.process_id
+        ? employeeQuery.data.process_id
+        : process,
+    [isProcessLeader, employeeQuery.data?.process_id, process],
+  );
+
   const { data: processes, isSuccess } = useProcesses({ deleted_at: 'null' });
   const createEmployeeMutation = useCreateEmployee({
     name,
@@ -308,12 +338,12 @@ function CreateEmployee() {
     e.preventDefault();
     const nameResult = safeParse(EmployeeNameSchema, name);
     const iconResult = safeParse(EmployeeAvatarSchema, avatar);
-    
+
     // Only validate process if user is not a process leader
-    const processResult = isProcessLeader 
-      ? { success: true as const, issues: null } 
+    const processResult = isProcessLeader
+      ? { success: true as const, issues: null }
       : safeParse(EmployeeProcessSchema, process);
-    
+
     if (nameResult.success && iconResult.success && processResult.success) {
       toast.promise(createEmployeeMutation.mutateAsync(), {
         loading: 'Creando empleado...',
@@ -325,7 +355,10 @@ function CreateEmployee() {
     setErrors({
       name: nameResult.issues && nameResult.issues[0].message,
       avatar: iconResult.issues && iconResult.issues[0].message,
-      process: !isProcessLeader && processResult.issues ? processResult.issues[0].message : undefined,
+      process:
+        !isProcessLeader && processResult.issues
+          ? processResult.issues[0].message
+          : undefined,
     });
   };
 
@@ -392,21 +425,23 @@ function CreateEmployee() {
 
   // If user is process leader, wait for employee data to load
   if (isProcessLeader) {
-	  if(employeeQuery.isSuccess) {
-		  return <CreateEmployeeForm 
-              isProcessLeader={isProcessLeader}
-              processes={processes ?? []}
-              isSuccess={isSuccess}
-              onSubmit={onSubmit}
-              name={name}
-              onNameChange={onNameChange}
-              email={email}
-              onEmailChange={onEmailChange}
-              onAvatarChange={onAvatarChange}
-              onProcessChange={onProcessChange}
-              errors={errors}
-            />
-	  }
+    if (employeeQuery.isSuccess) {
+      return (
+        <CreateEmployeeForm
+          isProcessLeader={isProcessLeader}
+          processes={processes ?? []}
+          isSuccess={isSuccess}
+          onSubmit={onSubmit}
+          name={name}
+          onNameChange={onNameChange}
+          email={email}
+          onEmailChange={onEmailChange}
+          onAvatarChange={onAvatarChange}
+          onProcessChange={onProcessChange}
+          errors={errors}
+        />
+      );
+    }
     return (
       <QueryRenderer
         query={employeeQuery}
@@ -419,14 +454,9 @@ function CreateEmployee() {
               </div>
             </div>
           ),
-          error: ({ error }: { error: Error }) => (
-            <div className="space-y-4 p-12">
-              <CredenzaTitle className="mb-4">Registrar empleado</CredenzaTitle>
-              <p className="text-center text-red-500">Error: {error.message}</p>
-            </div>
-          ),
+          error: CreateEmployeeModalError,
           success: () => (
-            <CreateEmployeeForm 
+            <CreateEmployeeForm
               isProcessLeader={isProcessLeader}
               processes={processes ?? []}
               isSuccess={isSuccess}
@@ -447,7 +477,7 @@ function CreateEmployee() {
 
   // For non-process leaders, render form directly
   return (
-    <CreateEmployeeForm 
+    <CreateEmployeeForm
       isProcessLeader={isProcessLeader}
       processes={processes ?? []}
       isSuccess={isSuccess}
@@ -463,21 +493,21 @@ function CreateEmployee() {
   );
 }
 
-function CreateEmployeeForm({ 
-  isProcessLeader, 
-  processes, 
-  isSuccess, 
-  onSubmit, 
-  name, 
-  onNameChange, 
-  email, 
-  onEmailChange, 
-  onAvatarChange, 
-  onProcessChange, 
-  errors 
+function CreateEmployeeForm({
+  isProcessLeader,
+  processes,
+  isSuccess,
+  onSubmit,
+  name,
+  onNameChange,
+  email,
+  onEmailChange,
+  onAvatarChange,
+  onProcessChange,
+  errors,
 }: {
   isProcessLeader: boolean;
-  processes: any[];
+  processes: Process[];
   isSuccess: boolean;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   name: string;
@@ -528,7 +558,7 @@ function CreateEmployeeForm({
             <SelectContent className="max-h-60">
               <SelectGroup>
                 {isSuccess &&
-                  processes.map((process: any) => (
+                  processes.map(process => (
                     <SelectItem key={process.id} value={String(process.id)}>
                       <div className="flex flex-row items-center gap-4">
                         <Avatar>

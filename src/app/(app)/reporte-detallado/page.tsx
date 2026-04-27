@@ -32,6 +32,7 @@ import useAuth from '@/hooks/useAuth';
 import { Role } from '@/types/user';
 import { Dialog, DialogContent, DialogPortal } from '@radix-ui/react-dialog';
 import { DialogOverlay } from '@/components/ui/dialog';
+import usePersistentTablePagination from '@/hooks/usePersistentTablePagination';
 import useAnswers from './useAnswers';
 import columns from './TableDefinition';
 import DetailsDialogContent from './DetailsDialogContent';
@@ -183,16 +184,20 @@ function AnswersPage() {
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'created_at', desc: true },
   ]);
+  const tablePagination = usePersistentTablePagination();
   const table = useReactTable({
     data: answersQuery.data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
+    onPaginationChange: tablePagination.onPaginationChange,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: tablePagination.autoResetPageIndex,
     state: {
       sorting,
+      pagination: tablePagination.pagination,
       columnVisibility: {
         email:
           user?.role === Role.NATIONAL_COORDINATOR ||
@@ -203,7 +208,7 @@ function AnswersPage() {
 
   return (
     <motion.main
-      className="mx-4 flex h-full flex-col items-center space-y-6 py-8 max-w-[80vw]"
+      className="mx-4 flex h-full max-w-[80vw] flex-col items-center space-y-6 py-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}>
