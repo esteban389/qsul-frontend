@@ -1,7 +1,7 @@
-import { useSyncExternalStore } from "react";
-import { categories } from "./category";
-import { ChartRequest } from "@/types/chart";
-import { format } from "date-fns";
+import { useSyncExternalStore } from 'react';
+import { format } from 'date-fns';
+import { ChartRequest } from '@/types/chart';
+import { categories } from './category';
 
 type State = {
   employee: number;
@@ -12,17 +12,26 @@ type State = {
   service: number;
   survey: number;
   category: keyof typeof categories;
-  group_by: "campuses" | "processes" | "services" | "employees";
+  group_by: 'campuses' | 'processes' | 'services' | 'employees';
   time_frame: 'year' | 'month';
   step: number;
-}
+};
 
-type ClientMutableState = Omit<State, "category" | "category_description" | "group_by">
+type ClientMutableState = Omit<
+  State,
+  'category' | 'category_description' | 'group_by'
+>;
 
-type BasicFilters = Omit<ClientMutableState, "employee" | "campus" | "process" | "service">
+type BasicFilters = Omit<
+  ClientMutableState,
+  'employee' | 'campus' | 'process' | 'service'
+>;
 
 type StateActions = {
-  applyFilter: <K extends keyof BasicFilters>(filter: K, value: State[K]) => void;
+  applyFilter: <K extends keyof BasicFilters>(
+    filter: K,
+    value: State[K],
+  ) => void;
   getState: () => State;
   getStateSlice: <K extends keyof State>(filter: K) => State[K];
   getRequest: () => Partial<ChartRequest>;
@@ -31,15 +40,18 @@ type StateActions = {
   selectService: (service: number) => void;
   selectEmployee: (employee: number) => void;
   clearFilters: () => void;
-  setDefaultState: (getDef: (oldDefault: State) => State) => void;
+  setDefaultState: (
+    getDef: (oldDefault: State) => State,
+    options?: { applyToCurrentState?: boolean },
+  ) => void;
   cleanupState: () => void;
-}
+};
 
 type StoreActions = {
-  subscribe: (callback: () => void) => () => void,
-  getSnapshot: () => State,
-  getServerSnapshot: () => State
-}
+  subscribe: (callback: () => void) => () => void;
+  getSnapshot: () => State;
+  getServerSnapshot: () => State;
+};
 
 // Storage key for localStorage
 const STORAGE_KEY = 'report-filters-state';
@@ -91,13 +103,12 @@ const createReportStore: () => StateActions & StoreActions = () => {
 
   // Try to load state from localStorage
   const storedState = deserializeState(
-    typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+    typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null,
   );
 
   // Merge initial state with stored state
   let state: State = { ...initialState, ...storedState };
   let defaultState: State = { ...initialState };
-
 
   const listeners = new Set<() => void>();
 
@@ -137,7 +148,7 @@ const createReportStore: () => StateActions & StoreActions = () => {
         employee: 0,
         category: 'process',
         group_by: 'processes',
-        step: 2
+        step: 2,
       });
     },
     selectProcess: (process: number) => {
@@ -147,7 +158,7 @@ const createReportStore: () => StateActions & StoreActions = () => {
         employee: 0,
         category: 'service',
         group_by: 'services',
-        step: 3
+        step: 3,
       });
     },
     selectService: (service: number) => {
@@ -156,7 +167,7 @@ const createReportStore: () => StateActions & StoreActions = () => {
         employee: 0,
         category: 'employee',
         group_by: 'employees',
-        step: 4
+        step: 4,
       });
     },
     selectEmployee: (employee: number) => {
@@ -164,13 +175,22 @@ const createReportStore: () => StateActions & StoreActions = () => {
         employee,
         category: 'service',
         group_by: 'services',
-        step: 5
+        step: 5,
       });
     },
-    setDefaultState: (getNewDefaultState: (oldDefault: State) => State) => {
+    setDefaultState: (
+      getNewDefaultState: (oldDefault: State) => State,
+      options?: { applyToCurrentState?: boolean },
+    ) => {
       const newDefaultState = getNewDefaultState(defaultState);
       defaultState = { ...defaultState, ...newDefaultState };
-      updateState(defaultState);
+
+      if (options?.applyToCurrentState) {
+        updateState({
+          survey: defaultState.survey,
+          start_date: defaultState.start_date,
+        });
+      }
     },
     clearFilters() {
       updateState(defaultState);
@@ -179,8 +199,8 @@ const createReportStore: () => StateActions & StoreActions = () => {
     getStateSlice: <K extends keyof State>(filter: K) => state[filter],
     getRequest: () => {
       return {
-        start_date: format(state.start_date, "yyyy-MM-dd"),
-        end_date: format(state.end_date, "yyyy-MM-dd"),
+        start_date: format(state.start_date, 'yyyy-MM-dd'),
+        end_date: format(state.end_date, 'yyyy-MM-dd'),
         survey: state.survey,
         campus: state.campus !== 0 ? state.campus : undefined,
         process: state.process !== 0 ? state.process : undefined,
@@ -188,13 +208,13 @@ const createReportStore: () => StateActions & StoreActions = () => {
         employee: state.employee !== 0 ? state.employee : undefined,
         group_by: state.group_by,
         time_frame: state.time_frame,
-      }
+      };
     },
     cleanupState: () => {
       updateState(defaultState);
-    }
-  }
-}
+    },
+  };
+};
 
 const store = createReportStore();
 
