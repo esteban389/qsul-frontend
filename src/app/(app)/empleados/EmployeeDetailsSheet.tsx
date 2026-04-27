@@ -552,23 +552,23 @@ function ServiceItem({
   return (
     <li
       key={service.id}
-      className="flex w-full flex-row items-center gap-4 rounded border border-input p-2">
-      <div className="flex w-full flex-row items-center gap-4">
-        <Avatar>
+      className="flex w-full min-w-0 flex-row items-start gap-4 rounded border border-input p-2">
+      <div className="flex min-w-0 flex-1 flex-row items-start gap-4">
+        <Avatar className="shrink-0">
           <AvatarImage
             src={service.icon ? env('API_URL') + service.icon : undefined}
           />
           <AvatarFallback>{getInitials(service.name)}</AvatarFallback>
         </Avatar>
-        {service.name}
+        <span className="min-w-0 break-words leading-snug">{service.name}</span>
       </div>
       {can('delete', 'employee') && removeServiceMutation.isPending ? (
-        <LoaderCircle className="animate-spin" />
+        <LoaderCircle className="shrink-0 animate-spin" />
       ) : (
         <Button
           onClick={() => removeServiceMutation.mutate()}
           variant="outline"
-          className="border-0 p-0 text-red-500 transition-transform hover:scale-125 hover:bg-transparent hover:text-red-500">
+          className="shrink-0 border-0 p-0 text-red-500 transition-transform hover:scale-125 hover:bg-transparent hover:text-red-500">
           <CircleX />
         </Button>
       )}
