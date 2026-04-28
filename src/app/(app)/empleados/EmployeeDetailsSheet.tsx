@@ -471,7 +471,7 @@ function Services({
       )}
       {can('update', 'employee') &&
         (addingService ? (
-          <div className="mt-4 flex h-fit w-full flex-col gap-2 md:flex-row md:items-start">
+          <div className="mt-4 flex h-fit w-full flex-col gap-2 md:items-start">
             {isPending && <Skeleton className="h-4 w-24" />}
             {isSuccess && allServices && (
               <>
