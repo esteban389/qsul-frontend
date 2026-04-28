@@ -456,7 +456,7 @@ function Services({
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 pb-24 sm:pb-6">
       <Label>Servicios</Label>
       {services && services.length > 0 && (
         <ul className="w-full space-y-4">
@@ -478,32 +478,16 @@ function Services({
                 <div className="min-w-0 flex-1">
                   <Select
                     onValueChange={value => setSelectedService(Number(value))}>
-                    <SelectTrigger className="h-fit w-full min-w-0">
+                    <SelectTrigger className="w-full min-w-0 text-left">
                       <SelectValue placeholder="Seleccionar servicio" />
                     </SelectTrigger>
-                    <SelectContent className="max-h-60 max-w-[calc(100vw-2rem)]">
+                    <SelectContent className="max-h-60 w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-2rem)]">
                       <SelectGroup>
                         {allServices.map(service => (
                           <SelectItem
                             key={service.id}
                             value={String(service.id)}>
-                            <div className="flex min-w-0 items-start gap-4">
-                              <Avatar className="shrink-0">
-                                <AvatarImage
-                                  src={
-                                    service.icon
-                                      ? env('API_URL') + service.icon
-                                      : undefined
-                                  }
-                                />
-                                <AvatarFallback>
-                                  {getInitials(service.name)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="min-w-0 flex-1 break-words leading-snug">
-                                {service.name}
-                              </span>
-                            </div>
+                            {service.name}
                           </SelectItem>
                         ))}
                       </SelectGroup>
