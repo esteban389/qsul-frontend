@@ -449,6 +449,7 @@ function Services({
       loading: 'Agregando servicio',
       success: () => {
         setAddingService(false);
+        setSelectedService(null);
         return 'Servicio agregado';
       },
       error: 'Error al agregar servicio',
@@ -477,24 +478,41 @@ function Services({
               <>
                 <div className="min-w-0 flex-1">
                   <Select
+                    value={selectedService ? String(selectedService) : undefined}
                     onValueChange={value => setSelectedService(Number(value))}>
-                    <SelectTrigger className="w-full min-w-0 text-left">
+                    <SelectTrigger className="h-fit w-full min-w-0">
                       <SelectValue placeholder="Seleccionar servicio" />
                     </SelectTrigger>
-                    <SelectContent className="max-h-60 w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-2rem)]">
+                    <SelectContent className="max-h-60 max-w-[min(32rem,calc(100vw-2rem))]">
                       <SelectGroup>
                         {allServices.map(service => (
                           <SelectItem
                             key={service.id}
                             value={String(service.id)}>
-                            {service.name}
+                            <div className="flex min-w-0 items-start gap-4">
+                              <Avatar className="shrink-0">
+                                <AvatarImage
+                                  src={
+                                    service.icon
+                                      ? env('API_URL') + service.icon
+                                      : undefined
+                                  }
+                                />
+                                <AvatarFallback>
+                                  {getInitials(service.name)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="min-w-0 flex-1 break-words leading-snug">
+                                {service.name}
+                              </span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex w-full flex-row items-center justify-center gap-2 md:w-auto md:shrink-0">
+                <div className="flex w-full flex-row items-center justify-center gap-2 md:w-auto md:shrink-0 md:justify-start">
                   <Button
                     variant="default"
                     className="bg-emerald-600 hover:bg-emerald-800"
@@ -504,7 +522,10 @@ function Services({
                   <Button
                     variant="default"
                     className="bg-red-600 hover:bg-red-800"
-                    onClick={() => setAddingService(false)}>
+                    onClick={() => {
+                      setSelectedService(null);
+                      setAddingService(false);
+                    }}>
                     <X />
                   </Button>
                 </div>
