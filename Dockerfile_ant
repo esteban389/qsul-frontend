@@ -1,0 +1,14 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --frozen-lockfile --legacy-peer-deps
+
+COPY . .
+
+RUN node --heap-prof node_modules/next/dist/bin/next build
+
+EXPOSE 3000
+
+CMD ["node", "--inspect","node_modules/next/dist/bin/next", "start"]

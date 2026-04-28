@@ -2,5 +2,28 @@ services:
   frontend:
     build: .
     ports:
-      - "3000:3000" # or 3000:3000 if SSR
+      - "3000:3000"
     restart: unless-stopped
+
+    networks:
+      - laravel-network
+
+    environment:
+      - NODE_ENV=production
+
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 200
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  laravel-network:
+    external: true
+    name: qsul-backend_laravel-network
+
